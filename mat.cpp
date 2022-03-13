@@ -1,5 +1,6 @@
 #include <string>
 #include <cctype>       // found on https://www.cplusplus.com/reference/cctype/isprint/
+#include <vector>       // after make tidy suggestion - https://stackoverflow.com/questions/1833127/two-dimensional-array-using-vector
 #include <iostream>
 #include "mat.hpp"
 
@@ -25,7 +26,8 @@ namespace ariel{
             throw invalid_argument{"Does not accept space as a symbol!"};
         }
 
-        char arr[row][col];
+        vector<vector<char>> arr(row, vector<char>(col));
+        //char arr[row][col]; // the above line is instead of a static C array, as suggested by 'Tidy'
         int start_row = 0;
         int start_col = 0;
         int end_row = row - 1;
