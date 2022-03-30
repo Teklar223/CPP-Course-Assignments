@@ -33,21 +33,32 @@ namespace ariel
 
         void show(int);
 
-        bool _page_exists(int page)
+        bool _is_row_empty(int page, int row)
         {
-            bool ans = false;
-            ans = this->notebook.count(page) > 0;
-            return ans;
+            if (this->_is_page_empty(page))
+            {
+                return true;
+            }
+            try
+            {
+                return this->notebook.at(page).at(row).empty();
+            }
+            catch (out_of_range)
+            {
+                return true;
+            }
         }
 
-        bool _row_exists(int page, int row)
+        bool _is_page_empty(int page)
         {
-            bool ans = false;
-            if (this->_page_exists(page))
+            try
             {
-                ans = this->notebook.at(page).count(row) > 0;
+                return this->notebook.at(page).empty();
             }
-            return ans;
+            catch (out_of_range)
+            {
+                return true;
+            }
         }
 
         string _generate_string_from_char(char c, int length)
@@ -64,46 +75,45 @@ namespace ariel
         {
             int index = 0;
 
-            if (_page_exists(page))
+            if (_is_page_empty(page))
             {
-                if (_row_exists(page, row))
+                map<int, string> tmp;
+                tmp.insert({row, this->empty_row});
+                this->notebook.insert({page, tmp});
+                for (const char &c : str)
                 {
+
+                    this->notebook[page][row][(unsigned int)(column + index)] = c;
+                    index++;
+                }
+            }
+            else
+            {
+                if (_is_row_empty(page, row))
+                {
+                    this->notebook[page].insert({row, this->empty_row});
+
                     for (const char &c : str)
                     {
-                        this->notebook.at(page)[row][(unsigned int)(column + index)] = c;
+                        this->notebook[page][row][(unsigned int)(column + index)] = c;
                         index++;
                     }
                 }
                 else
                 {
-                    for (const char &c : str)
-                    {
-                        try
+                    for (int i = 0; i < str.length(); i++)
+                    { // this block checks that nothing else is written
+                        if (this->notebook.at(page).at(row).at((unsigned int)(column + i)) != '_')
                         {
-                            if (this->notebook.at(page).at(row).at((unsigned int)(column + index)) != '_')
-                            {
-                                __throw_invalid_argument("cant write on something other than '_'");
-                            }
-                        }
-                        catch (std::out_of_range)
-                        {
-                            // pass, this is fine.
+                            throw std::invalid_argument("cant write on something other than '_'");
                         }
                     }
 
-                    for (const char &c : str)
+                    for (const char &c : str) // this block writes to the map
                     {
-                        this->notebook.at(page)[row][(unsigned int)(column + index)] = c;
+                        this->notebook[page][row][(unsigned int)(column + index)] = c;
                         index++;
                     }
-                }
-            }
-            else
-            {
-                for (const char &c : str)
-                {
-                    this->notebook[page][row][(unsigned int)(column + index)] = c;
-                    index++;
                 }
             }
         }
@@ -113,72 +123,38 @@ namespace ariel
 
         void _write_vertical(int page, int row, int column, const string &str)
         {
-            int index = 0;
-
-            if (_page_exists(page))
+            if (_is_page_empty(page))
             {
-                if (_row_exists(page, row))
-                {
-                    for (const char &c : str)
-                    {
-                        this->notebook.at(page)[row + index][(unsigned int)(column)] = c;
-                        index++;
-                    }
-                }
-                else
-                {
-                    for (const char &c : str)
-                    {
-                        try
-                        {
-                            if (this->notebook.at(page).at(row + index).at((unsigned int)column) != '_')
-                            {
-                                __throw_invalid_argument("cant write on something other than '_'");
-                            }
-                        }
-                        catch (std::out_of_range)
-                        {
-                            // pass, this is fine.
-                        }
-                    }
+                map<int, string> tmp;
+                this->notebook.insert({page, tmp});
+            }
 
-                    for (const char &c : str)
+            for (int i = row; i < row + (int)(str.length()); i++)
+            {
+                if (!_is_row_empty(page, row + i))
+                {
+                    if (this->notebook.at(page).at(row).at((unsigned int)(column + i)) != '_')
                     {
-                        this->notebook.at(page)[row + index][(unsigned int)(column)] = c;
-                        index++;
+                        throw std::invalid_argument("cant write on something other than '_'");
                     }
                 }
             }
-            else
+
+            int index = 0;
+            for (const char &c : str)
             {
-                for (const char &c : str)
+                if (_is_row_empty(page, row + index))
                 {
-                    this->notebook[page][row + index][(unsigned int)(column)] = c;
-                    index++;
+                    this->notebook[page].insert({row + index, this->empty_row});
                 }
+                this->notebook[page][row + index][(unsigned int)(column)] = c;
+                index++;
             }
         }
 
         string _read_horizontal(int page, int row, int column, int length)
         {
-            string str = "";
-            for (int i = 0; i < length; i++)
-            {
-                try
-                {
-                    str += this->notebook.at(page).at(row + i).at((unsigned int)column);
-                }
-                catch (std::out_of_range)
-                {
-                    str += '_';
-                }
-            }
-            return str;
-        }
-
-        string _read_vertical(int page, int row, int column, int length)
-        {
-            string str = "";
+            string str;
             for (int i = 0; i < length; i++)
             {
                 try
@@ -193,31 +169,98 @@ namespace ariel
             return str;
         }
 
+        string _read_vertical(int page, int row, int column, int length)
+        {
+            string str;
+            for (int i = 0; i < length; i++)
+            {
+                try
+                {
+                    str += this->notebook.at(page).at(row + i).at((unsigned int)(column));
+                }
+                catch (std::out_of_range)
+                {
+                    str += '_';
+                }
+            }
+            return str;
+        }
+
         void _erase_horizontal(int page, int row, int column, int length)
         {
-            string str = this->_generate_string_from_char('~', length);
-            this->_write_horizontal(page, row, column, str);
+            if (_is_page_empty(page))
+            {
+                map<int, string> tmp;
+                tmp.insert({row, this->empty_row});
+                this->notebook.insert({page, tmp});
+                for (int i = 0; i < length; i++)
+                    {
+                        this->notebook[page][row][(unsigned int)(column + i)] = '~';
+                    }
+            }
+            else
+            {
+                if (_is_row_empty(page, row))
+                {
+                    this->notebook[page].insert({row, this->empty_row});
+
+                    for (int i = 0; i < length; i++)
+                    {
+                        this->notebook[page][row][(unsigned int)(column + i)] = '~';
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < length; i++)
+                    {
+                        this->notebook[page][row][(unsigned int)(column + i)] = '~';
+                    }
+                }
+            }
         }
 
         void _erase_vertical(int page, int row, int column, int length)
         {
-            string str = this->_generate_string_from_char('~', length);
-            this->_write_vertical(page, row, column, str);
+            if (_is_page_empty(page))
+            {
+                map<int, string> tmp;
+                this->notebook.insert({page, tmp});
+            }
+
+            for (int i = row; i < row + length; i++)
+            {
+                if (!_is_row_empty(page, row + i))
+                {
+                    if (this->notebook.at(page).at(row).at((unsigned int)(column + i)) != '_')
+                    {
+                        throw std::invalid_argument("cant write on something other than '_'");
+                    }
+                }
+            }
+
+            for (int i = 0; i < length; i++)
+            {
+                if (_is_row_empty(page, row + i))
+                {
+                    this->notebook[page].insert({row + i, this->empty_row});
+                }
+                this->notebook[page][row + i][(unsigned int)(column)] = '~';
+            }
         }
 
         string _get_row_by_page(int page, int row)
         {
-            if (this->_page_exists(page))
+            if (this->_is_page_empty(page))
             {
                 return this->empty_row;
             }
 
-            if (this->_row_exists(page, row))
+            if (this->_is_row_empty(page, row))
             {
                 return this->empty_row;
             }
 
-            return this->notebook.at(page).at(row);
+            return this->notebook[page][row];
         }
 
         void _print_empty_until_num(int num)
@@ -249,7 +292,7 @@ namespace ariel
 
             // https://stackoverflow.com/questions/1443793/iterate-keys-in-a-c-map
 
-            if (this->_page_exists(page))
+            if (this->_is_page_empty(page))
             {
                 return 0;
             }
