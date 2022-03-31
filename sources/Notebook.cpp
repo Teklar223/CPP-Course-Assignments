@@ -37,14 +37,14 @@ namespace ariel
 
     bool Notebook::write(int page, int row, int column, Direction dir, const string &str)
     {
-        if (column < 0 || row < 0 || page < 0 || column >= hundred || (int)(str.length() < 1))
+        if (column < 0 || row < 0 || page < 0 || column >= hundred || (str.length() < 1))
         {
             throw invalid_argument{"check that ints are atleast 0 and that column is not above hundred"};
         }
 
         for (const char &c : str)
         {
-            if (c == '~' || !isprint(c) ){
+            if (c == '~' || !((bool)isprint(c)) ){
                 throw invalid_argument{"cant write some chars in the string or it's empty"};
             }
         }
@@ -75,7 +75,7 @@ namespace ariel
 
         if (dir == Direction::Horizontal)
         {
-            if (column + length >= hundred)
+            if (column + length > hundred)
             {
                 throw invalid_argument{"cant read past the hundred'th column in a row!"};
             }
@@ -100,7 +100,7 @@ namespace ariel
 
         if (dir == Direction::Horizontal)
         {
-            if (column + length >= hundred)
+            if (column + length > hundred)
             {
                 throw invalid_argument{"cant erase past the hundred'th column in a row!"};
             }

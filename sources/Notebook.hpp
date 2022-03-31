@@ -82,7 +82,6 @@ namespace ariel
                 this->notebook.insert({page, tmp});
                 for (const char &c : str)
                 {
-
                     this->notebook[page][row][(unsigned int)(column + index)] = c;
                     index++;
                 }
@@ -129,11 +128,11 @@ namespace ariel
                 this->notebook.insert({page, tmp});
             }
 
-            for (int i = row; i < row + (int)(str.length()); i++)
+            for (int i = 0; i < (int)(str.length()); i++)
             {
                 if (!_is_row_empty(page, row + i))
                 {
-                    if (this->notebook.at(page).at(row).at((unsigned int)(column + i)) != '_')
+                    if (this->notebook[page][row + i].at((unsigned int)(column)) != '_')
                     {
                         throw std::invalid_argument("cant write on something other than '_'");
                     }
@@ -194,9 +193,9 @@ namespace ariel
                 tmp.insert({row, this->empty_row});
                 this->notebook.insert({page, tmp});
                 for (int i = 0; i < length; i++)
-                    {
-                        this->notebook[page][row][(unsigned int)(column + i)] = '~';
-                    }
+                {
+                    this->notebook[page][row][(unsigned int)(column + i)] = '~';
+                }
             }
             else
             {
@@ -225,17 +224,6 @@ namespace ariel
             {
                 map<int, string> tmp;
                 this->notebook.insert({page, tmp});
-            }
-
-            for (int i = row; i < row + length; i++)
-            {
-                if (!_is_row_empty(page, row + i))
-                {
-                    if (this->notebook.at(page).at(row).at((unsigned int)(column + i)) != '_')
-                    {
-                        throw std::invalid_argument("cant write on something other than '_'");
-                    }
-                }
             }
 
             for (int i = 0; i < length; i++)
@@ -267,7 +255,7 @@ namespace ariel
         {
             for (int i = 1; i <= num; i++)
             { // starts at 1 since it's more natural than 0 to represent rows ( this is for visual only )
-                std::cout << i << " " << this->empty_row;
+                std::cout << this->empty_row << " " << i;
             }
         }
 
@@ -275,7 +263,22 @@ namespace ariel
         {
             for (int i = 1; i <= num; i++)
             { // starts at 1 since it's more natural than 0 to represent rows ( this is for visual only )
-                std::cout << i << " " << this->_get_row_by_page(page, i);
+                if (i < 10)
+                {
+                    std::cout << i << "    " << this->_get_row_by_page(page, i);
+                }
+                else if (i < 100)
+                {
+                    std::cout << i << "   " << this->_get_row_by_page(page, i);
+                }
+                else if (i < 1000)
+                {
+                    std::cout << i << "  " << this->_get_row_by_page(page, i);
+                }
+                else if (i < 10000)
+                {
+                    std::cout << i << " " << this->_get_row_by_page(page, i);
+                }
             }
         }
 
@@ -283,7 +286,7 @@ namespace ariel
         {
             for (int i = num1; i <= num2; i++)
             {
-                std::cout << i << " " << this->empty_row;
+                std::cout << this->empty_row << " " << i;
             }
         }
 
