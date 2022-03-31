@@ -1,5 +1,3 @@
-solution*
-
 # Prerequisites
 *.d
 
@@ -35,5 +33,8 @@ solution*
 demo
 test
 
-# vsCode config files
+# macOS
+**/.DS_Store
+
+# vscode config files
 **/.vscode
