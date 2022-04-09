@@ -5,7 +5,8 @@ using zich::Matrix;
 
 namespace zich
 {
-    Matrix::Matrix() // empty constructor fills all with 0
+
+    Matrix::Matrix() // empty constructor fills 0*0 with 0
     {
         vector<vector<double>> vec(0, vector<double>(0, 0));
         this->matrix = vec;
@@ -13,7 +14,7 @@ namespace zich
         this->col = 0;
     }
 
-    Matrix::Matrix(int row, int col) // emty constructor fills all with 0
+    Matrix::Matrix(int row, int col) // empty constructor that fills row*col with 0's
     {
         // https://stackoverflow.com/questions/65311502/how-to-initialize-vector-of-a-vector-with-custom-values
         vector<vector<double>> vec((unsigned int)row, vector<double>((unsigned int)col, 0));
@@ -29,7 +30,7 @@ namespace zich
         {
             for (unsigned int j = 0; j < col; j++)
             {
-                vec[i][j] = vect.at((i * row + j));
+                vec[i][j] = vect.at((i * (unsigned int)row + j));
             }
         }
 
@@ -79,171 +80,109 @@ namespace zich
         // not implemented
     }
 
-    Matrix &Matrix::operator+()
-    {
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    }
-    Matrix &Matrix::operator+(const Matrix &mat) const
-    {
-        check_dimensions(mat);
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    }
-
-    Matrix &Matrix::operator+(double scalar) const
-    {
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    }
-
-    Matrix &Matrix::operator+=(const Matrix &mat)
-    {
-        check_dimensions(mat);
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    }
-
-    Matrix &Matrix::operator+=(double scalar)
-    {
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    }
-
-    Matrix &Matrix::operator++() const
-    {
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    } // TODO: void?
-
-    Matrix &Matrix::operator-()
-    {
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    }
-
-    Matrix &Matrix::operator-(const Matrix &mat) const
-    {
-        check_dimensions(mat);
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    }
-
-    Matrix &Matrix::operator-(double scalar) const
-    {
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    }
-
-    Matrix &Matrix::operator-=(const Matrix &mat)
-    {
-        check_dimensions(mat);
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    }
-
-    Matrix &Matrix::operator-=(const double scalar)
-    {
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    }
-
-    Matrix &Matrix::operator--() const
-    {
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    } // TODO: void?s
-
-    Matrix &Matrix::operator*(const Matrix &mat) const
-    {
-        check_dimensions(mat);
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    }
-
-    Matrix &Matrix::operator*(double scalar) const
-    {
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    }
-    Matrix &Matrix::operator*=(const Matrix &mat)
-    {
-        check_dimensions(mat);
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    }
-    Matrix &Matrix::operator*=(double scalar)
-    {
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    }
-
-    bool Matrix::operator<(const Matrix &mat) const
-    {
-        check_dimensions(mat);
-        return true; // not implemented
-    }
-    bool Matrix::operator<=(const Matrix &mat) const
-    {
-        check_dimensions(mat);
-        return true; // not implemented
-    }
-    bool Matrix::operator==(const Matrix &mat) const
-    {
-        check_dimensions(mat);
-        return true; // not implemented
-    }
-    bool Matrix::operator!=(const Matrix &mat) const
-    {
-        check_dimensions(mat);
-        return true; // not implemented
-    }
-    bool Matrix::operator>(const Matrix &mat) const
-    {
-        check_dimensions(mat);
-        return true; // not implemented
-    }
-    bool Matrix::operator>=(const Matrix &mat) const
-    {
-        check_dimensions(mat);
-        return true; // not implemented
-    }
-
-    ostream &operator<<(ostream &out, const Matrix &mat)
-    {
-        return out; // not implemented
-    }
-    void operator>>(istream &in, const Matrix &mat)
-    {
-    }
-
-    Matrix &operator*(int num, const Matrix &mat)
-    {
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    }
-    Matrix &operator*(double num, const Matrix &mat)
-    {
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    }
-    Matrix &operator+(int num, const Matrix &mat)
-    {
-        Matrix *m = new Matrix(1, 1); // not implemented
-        return *m;
-    }
-
     // Helpers:
+
+    template <class T>
+    bool __eq__(T a, T b) // equals
+    {
+        return a == b;
+    }
+    template <class T>
+    bool __neq__(T a, T b) // not equals
+    {
+        return a != b;
+    }
+    template <class T>
+    bool __lt__(T a, T b) // less then
+    {
+        return a < b;
+    }
+    template <class T>
+    bool __let__(T a, T b) // less equal then
+    {
+        return a <= b;
+    }
+    template <class T>
+    bool __mt__(T a, T b) // more then
+    {
+        return a > b;
+    }
+    template <class T>
+    bool __met__(T a, T b) // more equals then
+    {
+        return a >= b;
+    }
+
+    Matrix &Matrix::add_matrix(const Matrix &mat) const{
+        
+        check_dimensions(mat);
+
+        const vector<vector<double>> &vect1 = mat.matrix;
+        const vector<vector<double>> &vect2 = this->matrix;
+        int row = mat.row;
+        int col = mat.col;
+
+        vector<vector<double>> vec((unsigned int)row, vector<double>((unsigned int)col, 0));
+        for (unsigned int i = 0; i < row; i++)
+        {
+            for (unsigned int j = 0; j < col; j++)
+            {
+                vec[i][j] = vect1.at(i).at(j) + vect2.at(i).at(j);
+            }
+        }
+        Matrix *m = new Matrix(vec,row,col);
+        return *m;
+    }
+
+    Matrix &Matrix::add_scalar(const double &scalar) const{
+
+        const vector<vector<double>> &vect = this->matrix;
+        int row = this->row;
+        int col = this->col;
+
+        vector<vector<double>> vec((unsigned int)row, vector<double>((unsigned int)col, 0));
+        for (unsigned int i = 0; i < row; i++)
+        {
+            for (unsigned int j = 0; j < col; j++)
+            {
+                vec[i][j] = vect.at(i).at(j) + scalar;
+            }
+        }
+        Matrix *m = new Matrix(vec,row,col);
+        return *m;
+    }
+
+    Matrix &Matrix::multiply_matrix(const Matrix &mat2) const{
+        Matrix *m = new Matrix(); // not implemented
+        return *m;
+    }
+
+    Matrix &Matrix::multiply_scalar(const double &scalar) const{
+        const vector<vector<double>> &vect = this->matrix;
+        int row = this->row;
+        int col = this->col;
+
+        vector<vector<double>> vec((unsigned int)row, vector<double>((unsigned int)col, 0));
+        for (unsigned int i = 0; i < row; i++)
+        {
+            for (unsigned int j = 0; j < col; j++)
+            {
+                vec[i][j] = vect.at(i).at(j) * scalar;
+            }
+        }
+        Matrix *m = new Matrix(vec,row,col);
+        return *m;
+    }
 
     double Matrix::get_element_at(unsigned int row, unsigned int column) const
     {
         int mat_row = this->get_row();
         int mat_col = this->get_col();
-        if (row >= mat_row || col >= mat_col)
+        if (row > mat_row || col > mat_col)
         {
-            throw invalid_argument{"row or col out of bounds for this matrix!"};
+            throw invalid_argument{"row or col out of bounds for this matrix! "};
         }
-        return this->matrix.at(row).at(col);
+        return this->matrix.at(row).at(column);
     }
 
     void Matrix::check_dimensions(const Matrix &mat) const
@@ -254,35 +193,214 @@ namespace zich
         }
     }
 
-    bool compare_matrices_by_sign(const Matrix &mat1, const Matrix &mat2, std::function<bool(bool, bool)> func)
+    // template <class matrix,class compare>
+    bool compare_matrices_by_sign(const Matrix &mat1, const Matrix &mat2, bool func(double, double))
     {
+        /**
+         * @brief receives two matrices, and a comparison function to be used
+         */
         mat1.check_dimensions(mat2);
 
         int row = mat1.get_row();
         int col = mat1.get_col();
 
+        bool neq_flag = false;
+        if (__neq__<double> == func)
+        { // different logic is needed for the neq (not equal to) comparison
+            neq_flag = true;
+        }
+
+        bool ans = true;
+        if (neq_flag)
+        {
+            ans = false;
+        }
+
         for (unsigned int i = 0; i < row; i++)
         {
             for (unsigned int j = 0; j < col; j++)
             {
-                func(mat1.get_element_at(i, j), mat2.get_element_at(i, j));
+                if (!func(mat1.get_element_at(i, j), mat2.get_element_at(i, j)))
+                {
+                    if (neq_flag)
+                    {
+                        ans = true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
             }
-
-            return true;
         }
+
+        return ans;
     }
 
-    // privates:
+    void Matrix::operator=(const Matrix &mat){
+        this->set_matrix(mat.get_matrix());
+        this->set_row(mat.get_row());
+        this->set_col(mat.get_col());
+    }
 
-    /*
-    Matrix &add_matrices(const Matrix &mat1, const Matrix &mat2)
+    Matrix &Matrix::operator+()// unary operator
     {
-
+        Matrix *m = new Matrix(*this);
+        return *m;
     }
-
-    Matrix &add_scalar(const Matrix &mat, double scalar)
+    Matrix &Matrix::operator+(const Matrix &mat) const
     {
-
+        check_dimensions(mat);
+        return add_matrix(mat);
     }
-    */
+
+    Matrix &Matrix::operator+(const double &scalar) const
+    {
+        return add_scalar(scalar);
+    }
+
+    Matrix &Matrix::operator+=(const Matrix &mat)
+    {
+        check_dimensions(mat);
+        *this = *this + mat;
+        return *this;
+    }
+    
+    Matrix &Matrix::operator+=(const double &scalar)
+    {
+       *this = *this + scalar;
+        return *this;
+    }
+
+    Matrix &Matrix::operator++(int a) // a++
+    {
+        Matrix *m = +this;
+        (*this) += 1;
+        return *m;
+    }
+
+    Matrix &Matrix::operator++() // ++a
+    {
+        (*this) += 1;
+        return *this;
+    }
+
+    Matrix &Matrix::operator-() // unary operator
+    {
+        Matrix *m = new Matrix((*this)*-1);
+        return *m;
+    }
+
+    Matrix &Matrix::operator-(const Matrix &mat) const
+    {
+        check_dimensions(mat);
+        return add_matrix(mat * -1); //notice that it's adding the negative.
+    }
+
+    Matrix &Matrix::operator-(const double &scalar) const
+    {
+        return add_scalar(-scalar); //notice that it's adding the negative.
+    }
+
+    Matrix &Matrix::operator-=(const Matrix &mat)
+    {
+        check_dimensions(mat);
+        *this = *this - mat;
+        return *this;
+    }
+
+    Matrix &Matrix::operator-=(const double &scalar)
+    {
+        *this = *this - scalar;
+        return *this;
+    }
+
+    Matrix &Matrix::operator--(int a) // a--
+    {
+        Matrix *m = +this;
+        (*this) -= 1;
+        return *m;
+    }
+
+    Matrix &Matrix::operator--() // --a
+    {
+        (*this) -= 1;
+        return *this;
+    }
+
+    Matrix &Matrix::operator*(const Matrix &mat) const
+    {
+        check_dimensions(mat);
+        return multiply_matrix(mat);
+    }
+
+    Matrix &Matrix::operator*(const double &scalar) const
+    {
+        return multiply_scalar(scalar);
+    }
+    Matrix &Matrix::operator*=(const Matrix &mat)
+    {
+        check_dimensions(mat);
+        *this = *this * mat;
+        return *this;
+    }
+    Matrix &Matrix::operator*=(const double &scalar)
+    {
+        *this = *this * scalar;
+        return *this;
+    }
+
+    bool Matrix::operator<(const Matrix &mat) const
+    {
+        check_dimensions(mat);
+        return compare_matrices_by_sign(*this, mat, &__lt__); // passing less then comparison method
+    }
+    bool Matrix::operator<=(const Matrix &mat) const
+    {
+        check_dimensions(mat);
+        return compare_matrices_by_sign(*this, mat, &__let__); // passing less equal then comparison method
+    }
+    bool Matrix::operator==(const Matrix &mat) const
+    {
+        check_dimensions(mat);
+        return compare_matrices_by_sign(*this, mat, &__eq__); // passing equal to comparison method
+    }
+    bool Matrix::operator!=(const Matrix &mat) const
+    {
+        check_dimensions(mat);
+        return compare_matrices_by_sign(*this, mat, &__neq__); // passing not equal to comparison method
+    }
+    bool Matrix::operator>(const Matrix &mat) const
+    {
+        check_dimensions(mat);
+        return compare_matrices_by_sign(*this, mat, &__mt__); // passing more then comparison method
+    }
+    bool Matrix::operator>=(const Matrix &mat) const
+    {
+        check_dimensions(mat);
+        return compare_matrices_by_sign(*this, mat, &__met__); // passing more equal then comparison method
+    }
+
+    ostream &operator<<(ostream &out, const Matrix &mat)
+    {
+        return out; // not implemented
+    }
+    void operator>>(istream &in, const Matrix &mat)
+    {
+        // not implemented
+    }
+/*
+    Matrix &operator*(int num, const Matrix &mat)
+    {
+        return mat*num;  // not certain if this is needed
+    }
+*/
+    Matrix &operator*(double num, const Matrix &mat)
+    {
+        return mat*num;
+    }
+    Matrix &operator+(int num, const Matrix &mat)
+    {
+        return mat+num;
+    }
 }
