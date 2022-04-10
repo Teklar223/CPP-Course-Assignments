@@ -33,8 +33,4 @@
 demo
 test
 
-# macOS
-**/.DS_Store
-
-# vscode config files
-**/.vscode
+.vscode
