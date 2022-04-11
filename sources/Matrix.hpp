@@ -54,10 +54,16 @@ namespace zich
         // 'Helpers'
 
         double get_element_at(unsigned int row, unsigned int column) const;
-        void check_dimensions(const Matrix &mat) const; // whether or not this throws an error is up to implementation
+        void check_dimensions(const Matrix &mat) const;
+        void check_multiplication_dimensions(const Matrix &mat) const; // different rules when multiplying two matrices
+        Matrix &add_matrix(const Matrix &mat) const;
+        Matrix &add_scalar(const double &scalar) const;
+        Matrix &multiply_matrix(const Matrix &mat) const;
+        Matrix &multiply_scalar(const double &scalar) const;
+        string to_string() const;
 
         // Matrix & operator () (); // flexible method() decleration example
-        void operator=(const Matrix &mat);
+        Matrix &operator=(const Matrix &mat);
 
         Matrix &operator+();
         Matrix &operator+(const Matrix &mat) const;
@@ -96,12 +102,6 @@ namespace zich
         //friend Matrix &operator*(int num, const Matrix &mat);
         friend Matrix &operator*(double num, const Matrix &mat);
         friend Matrix &operator+(int num, const Matrix &mat);
-
-        Matrix &add_matrix(const Matrix &mat2) const;
-        Matrix &add_scalar(const double &scalar) const;
-
-        Matrix &multiply_matrix(const Matrix &mat2) const;
-        Matrix &multiply_scalar(const double &scalar) const;
     };
 }
 

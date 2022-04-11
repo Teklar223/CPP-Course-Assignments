@@ -98,7 +98,7 @@ namespace zich
         return a < b;
     }
     template <class T>
-    bool __let__(T a, T b) // less equal then
+    bool __let__(T a, T b) // less equals then
     {
         return a <= b;
     }
@@ -113,8 +113,9 @@ namespace zich
         return a >= b;
     }
 
-    Matrix &Matrix::add_matrix(const Matrix &mat) const{
-        
+    Matrix &Matrix::add_matrix(const Matrix &mat) const
+    {
+
         check_dimensions(mat);
 
         const vector<vector<double>> &vect1 = mat.matrix;
@@ -130,12 +131,12 @@ namespace zich
                 vec[i][j] = vect1.at(i).at(j) + vect2.at(i).at(j);
             }
         }
-        Matrix *m = new Matrix(vec,row,col);
+        Matrix *m = new Matrix(vec, row, col);
         return *m;
     }
 
-    Matrix &Matrix::add_scalar(const double &scalar) const{
-
+    Matrix &Matrix::add_scalar(const double &scalar) const
+    {
         const vector<vector<double>> &vect = this->matrix;
         int row = this->row;
         int col = this->col;
@@ -148,16 +149,42 @@ namespace zich
                 vec[i][j] = vect.at(i).at(j) + scalar;
             }
         }
-        Matrix *m = new Matrix(vec,row,col);
+        Matrix *m = new Matrix(vec, row, col);
         return *m;
     }
 
-    Matrix &Matrix::multiply_matrix(const Matrix &mat2) const{
-        Matrix *m = new Matrix(); // not implemented
+    Matrix &Matrix::multiply_matrix(const Matrix &mat) const
+    {
+        check_multiplication_dimensions(mat); // this multiplication is defind only when this.columns = mat.rows
+
+        const vector<vector<double>> &vect1 = mat.matrix;
+        const vector<vector<double>> &vect2 = this->matrix;
+        int row = mat.row;
+        int col = mat.col;
+
+        double sum = 0; // this will be used for storing the line * column multiplication later
+
+        vector<vector<double>> vec((unsigned int)row, vector<double>((unsigned int)col, 0));
+        for (unsigned int i = 0; i < row; i++)
+        {
+            for (unsigned int j = 0; j < col; j++)
+            {
+                sum = 0;
+
+                for (unsigned int r = 0; r < col; r++) // this loop is for the row * column multiplication.
+                {
+                    sum += vect1.at(i).at(r) * vect2.at(r).at(i);
+                }
+
+                vec[i][j] = sum;
+            }
+        }
+        Matrix *m = new Matrix(vec, row, col);
         return *m;
     }
 
-    Matrix &Matrix::multiply_scalar(const double &scalar) const{
+    Matrix &Matrix::multiply_scalar(const double &scalar) const
+    {
         const vector<vector<double>> &vect = this->matrix;
         int row = this->row;
         int col = this->col;
@@ -170,7 +197,7 @@ namespace zich
                 vec[i][j] = vect.at(i).at(j) * scalar;
             }
         }
-        Matrix *m = new Matrix(vec,row,col);
+        Matrix *m = new Matrix(vec, row, col);
         return *m;
     }
 
@@ -193,7 +220,40 @@ namespace zich
         }
     }
 
-    // template <class matrix,class compare>
+    void Matrix::check_multiplication_dimensions(const Matrix &mat) const
+    {
+        if (this->row != mat.get_col())
+        {
+            throw invalid_argument{"the left matrix' column amount must match the right matrix' row amount"};
+        }
+    }
+
+    string Matrix::to_string() const
+    {
+        const vector<vector<double>> &vect = this->matrix;
+        int row = this->row;
+        int col = this->col;
+
+        string ans;
+        string temp;
+        for (unsigned int i = 0; i < row; i++)
+        {
+            temp = "[";
+            for (unsigned int j = 0; j < col; j++)
+            {
+                if (j!=0 || j!=col-1){
+                    temp += " ";
+                }
+
+                temp += (*this).get_element_at(i,j);
+
+            }
+            temp += "]\n";
+            ans += temp;
+        }
+        return ans;
+    }
+
     bool compare_matrices_by_sign(const Matrix &mat1, const Matrix &mat2, bool func(double, double))
     {
         /**
@@ -237,13 +297,16 @@ namespace zich
         return ans;
     }
 
-    void Matrix::operator=(const Matrix &mat){
+    Matrix &Matrix::operator=(const Matrix &mat)
+    {
         this->set_matrix(mat.get_matrix());
         this->set_row(mat.get_row());
         this->set_col(mat.get_col());
+
+        return *this;
     }
 
-    Matrix &Matrix::operator+()// unary operator
+    Matrix &Matrix::operator+() // unary operator
     {
         Matrix *m = new Matrix(*this);
         return *m;
@@ -265,10 +328,10 @@ namespace zich
         *this = *this + mat;
         return *this;
     }
-    
+
     Matrix &Matrix::operator+=(const double &scalar)
     {
-       *this = *this + scalar;
+        *this = *this + scalar;
         return *this;
     }
 
@@ -287,19 +350,19 @@ namespace zich
 
     Matrix &Matrix::operator-() // unary operator
     {
-        Matrix *m = new Matrix((*this)*-1);
+        Matrix *m = new Matrix((*this) * -1);
         return *m;
     }
 
     Matrix &Matrix::operator-(const Matrix &mat) const
     {
         check_dimensions(mat);
-        return add_matrix(mat * -1); //notice that it's adding the negative.
+        return add_matrix(mat * -1); // notice that it's adding the negative.
     }
 
     Matrix &Matrix::operator-(const double &scalar) const
     {
-        return add_scalar(-scalar); //notice that it's adding the negative.
+        return add_scalar(-scalar); // notice that it's adding the negative.
     }
 
     Matrix &Matrix::operator-=(const Matrix &mat)
@@ -383,24 +446,19 @@ namespace zich
 
     ostream &operator<<(ostream &out, const Matrix &mat)
     {
+        string mat_str = mat.to_string();
         return out; // not implemented
     }
     void operator>>(istream &in, const Matrix &mat)
     {
         // not implemented
     }
-/*
-    Matrix &operator*(int num, const Matrix &mat)
-    {
-        return mat*num;  // not certain if this is needed
-    }
-*/
     Matrix &operator*(double num, const Matrix &mat)
     {
-        return mat*num;
+        return mat * num;
     }
     Matrix &operator+(int num, const Matrix &mat)
     {
-        return mat+num;
+        return mat + num;
     }
 }
