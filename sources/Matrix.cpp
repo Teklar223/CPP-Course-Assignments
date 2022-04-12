@@ -1,15 +1,11 @@
 #include "Matrix.hpp"
-#include <functional>
 using namespace zich;
-using zich::Matrix;
 
 namespace zich
 {
 
-    Matrix::Matrix() // empty constructor fills 0*0 with 0
+    Matrix::Matrix() // empty constructor
     {
-        vector<vector<double>> vec(0, vector<double>(0, 0));
-        this->matrix = vec;
         this->row = 0;
         this->col = 0;
     }
@@ -25,12 +21,17 @@ namespace zich
 
     Matrix::Matrix(const vector<double> &vect, int row, int col)
     {
+        if (vect.size() != row * col)
+        {
+            throw invalid_argument{"vector size does not match rows times columns!"};
+        }
+
         vector<vector<double>> vec((unsigned int)row, vector<double>((unsigned int)col, 0));
         for (unsigned int i = 0; i < row; i++)
         {
             for (unsigned int j = 0; j < col; j++)
             {
-                vec[i][j] = vect.at((i * (unsigned int)row + j));
+                vec[i][j] = vect.at((i * (unsigned int)col + j));
             }
         }
 
@@ -57,7 +58,6 @@ namespace zich
 
     Matrix::Matrix(const Matrix &mat)
     {
-        const vector<vector<double>> &vect = mat.matrix;
         int row = mat.row;
         int col = mat.col;
 
@@ -66,7 +66,7 @@ namespace zich
         {
             for (unsigned int j = 0; j < col; j++)
             {
-                vec[i][j] = vect.at(i).at(j);
+                vec[i][j] = mat.get_element_at(i,j);
             }
         }
 
@@ -77,7 +77,7 @@ namespace zich
 
     Matrix::~Matrix()
     {
-        // not implemented
+        // no dynamic memory allocated
     }
 
     // Helpers:
@@ -113,13 +113,10 @@ namespace zich
         return a >= b;
     }
 
-    Matrix &Matrix::add_matrix(const Matrix &mat) const
+    Matrix Matrix::add_matrix(const Matrix &mat) const
     {
-
         check_dimensions(mat);
 
-        const vector<vector<double>> &vect1 = mat.matrix;
-        const vector<vector<double>> &vect2 = this->matrix;
         int row = mat.row;
         int col = mat.col;
 
@@ -128,16 +125,15 @@ namespace zich
         {
             for (unsigned int j = 0; j < col; j++)
             {
-                vec[i][j] = vect1.at(i).at(j) + vect2.at(i).at(j);
+                vec[i][j] = (*this).get_element_at(i,j) + mat.get_element_at(i,j);
             }
         }
-        Matrix *m = new Matrix(vec, row, col);
-        return *m;
+        Matrix m = Matrix(vec, row, col);
+        return m;
     }
 
-    Matrix &Matrix::add_scalar(const double &scalar) const
+    Matrix Matrix::add_scalar(const double &scalar) const
     {
-        const vector<vector<double>> &vect = this->matrix;
         int row = this->row;
         int col = this->col;
 
@@ -146,21 +142,22 @@ namespace zich
         {
             for (unsigned int j = 0; j < col; j++)
             {
-                vec[i][j] = vect.at(i).at(j) + scalar;
+                vec[i][j] = (*this).get_element_at(i,j) + scalar;
             }
         }
-        Matrix *m = new Matrix(vec, row, col);
-        return *m;
+        Matrix m = Matrix(vec, row, col);
+        return m;
     }
 
-    Matrix &Matrix::multiply_matrix(const Matrix &mat) const
+    Matrix Matrix::multiply_matrix(const Matrix &mat) const
     {
-        check_multiplication_dimensions(mat); // this multiplication is defind only when this.columns = mat.rows
+        if ((*this).get_col() != mat.get_row())
+        {
+            throw invalid_argument{"the left matrix' column amount must match the right matrix' row amount"};
+        }
 
-        const vector<vector<double>> &vect1 = mat.matrix;
-        const vector<vector<double>> &vect2 = this->matrix;
-        int row = mat.row;
-        int col = mat.col;
+        int row = (*this).get_row();
+        int col = mat.get_col();
 
         double sum = 0; // this will be used for storing the line * column multiplication later
 
@@ -171,21 +168,20 @@ namespace zich
             {
                 sum = 0;
 
-                for (unsigned int r = 0; r < col; r++) // this loop is for the row * column multiplication.
+                for (unsigned int r = 0; r < mat.get_row(); r++) // this loop is for the row * column multiplication.
                 {
-                    sum += vect1.at(i).at(r) * vect2.at(r).at(i);
+                    sum += (*this).get_element_at(i,r) * mat.get_element_at(r,j);
                 }
 
                 vec[i][j] = sum;
             }
         }
-        Matrix *m = new Matrix(vec, row, col);
-        return *m;
+        Matrix m = Matrix(vec, row, col);
+        return m;
     }
 
-    Matrix &Matrix::multiply_scalar(const double &scalar) const
+    Matrix Matrix::multiply_scalar(const double &scalar) const
     {
-        const vector<vector<double>> &vect = this->matrix;
         int row = this->row;
         int col = this->col;
 
@@ -194,11 +190,11 @@ namespace zich
         {
             for (unsigned int j = 0; j < col; j++)
             {
-                vec[i][j] = vect.at(i).at(j) * scalar;
+                vec[i][j] = (*this).get_element_at(i,j) * scalar;
             }
         }
-        Matrix *m = new Matrix(vec, row, col);
-        return *m;
+        Matrix m = Matrix(vec, row, col);
+        return m;
     }
 
     double Matrix::get_element_at(unsigned int row, unsigned int column) const
@@ -214,21 +210,17 @@ namespace zich
 
     void Matrix::check_dimensions(const Matrix &mat) const
     {
-        if (this->row != mat.get_row() || this->col != mat.get_col())
+        if ((*this).get_row() != mat.get_row())
         {
-            throw invalid_argument{"row or col mismatch between these matrices."};
+            throw invalid_argument{"Row mismatch between these matrices."};
+        }
+        if ((*this).get_col() != mat.get_col())
+        {
+            throw invalid_argument{"Column mismatch between these matrices."};
         }
     }
 
-    void Matrix::check_multiplication_dimensions(const Matrix &mat) const
-    {
-        if (this->row != mat.get_col())
-        {
-            throw invalid_argument{"the left matrix' column amount must match the right matrix' row amount"};
-        }
-    }
-
-    string Matrix::to_string() const
+    string Matrix::__tostring__() const
     {
         const vector<vector<double>> &vect = this->matrix;
         int row = this->row;
@@ -236,19 +228,26 @@ namespace zich
 
         string ans;
         string temp;
+        string sub_string;
+        unsigned int index = 0;
         for (unsigned int i = 0; i < row; i++)
         {
             temp = "[";
             for (unsigned int j = 0; j < col; j++)
             {
-                if (j!=0 || j!=col-1){
+                if (j != 0 && j < col)
+                {
                     temp += " ";
                 }
-
-                temp += (*this).get_element_at(i,j);
-
+                sub_string = std::to_string((*this).get_element_at(i, j));
+                index = sub_string.find('.',0);
+                sub_string = sub_string.substr(0,index);
+                temp += sub_string;
             }
-            temp += "]\n";
+            temp += "]";
+            if (i < row-1){
+                temp += "\n";
+            }
             ans += temp;
         }
         return ans;
@@ -259,42 +258,57 @@ namespace zich
         /**
          * @brief receives two matrices, and a comparison function to be used
          */
+
         mat1.check_dimensions(mat2);
 
-        int row = mat1.get_row();
-        int col = mat1.get_col();
-
-        bool neq_flag = false;
-        if (__neq__<double> == func)
-        { // different logic is needed for the neq (not equal to) comparison
-            neq_flag = true;
-        }
-
         bool ans = true;
-        if (neq_flag)
-        {
-            ans = false;
-        }
 
-        for (unsigned int i = 0; i < row; i++)
+        if (func == __neq__<double> || func == __eq__<double>)
         {
-            for (unsigned int j = 0; j < col; j++)
+            if (func == __neq__<double>)
             {
-                if (!func(mat1.get_element_at(i, j), mat2.get_element_at(i, j)))
+                ans = false; // different logic is needed for the neq (not equal to) comparison
+            }
+
+            int row = mat1.get_row();
+            int col = mat1.get_col();
+
+            for (unsigned int i = 0; i < row; i++)
+            {
+                for (unsigned int j = 0; j < col; j++)
                 {
-                    if (neq_flag)
-                    {
-                        ans = true;
-                    }
-                    else
+                    if (!func(mat1.get_element_at(i, j), mat2.get_element_at(i, j)) && func == __eq__<double>)
                     {
                         return false;
+                    }
+
+                    if (func(mat1.get_element_at(i, j), mat2.get_element_at(i, j)) && func == __neq__<double>){
+                        ans = true;
                     }
                 }
             }
         }
+        else
+        {
+            double sum_mat1 = mat1.sum_matrix();
+            double sum_mat2 = mat2.sum_matrix();
+            return func(sum_mat1, sum_mat2);
+        }
 
-        return ans;
+        return ans; // reaches here iff function is __neq__ or __eq__
+    }
+
+    double Matrix::sum_matrix() const
+    {
+        double sum = 0;
+        for (unsigned int i = 0; i < this->row; i++)
+            {
+                for (unsigned int j = 0; j < this->col; j++)
+                {
+                    sum += (*this).get_element_at(i,j);
+                }
+            }
+        return sum;
     }
 
     Matrix &Matrix::operator=(const Matrix &mat)
@@ -306,25 +320,23 @@ namespace zich
         return *this;
     }
 
-    Matrix &Matrix::operator+() // unary operator
+    Matrix Matrix::operator+() const // unary operator
     {
-        Matrix *m = new Matrix(*this);
-        return *m;
+        Matrix m = Matrix(*this);
+        return m;
     }
-    Matrix &Matrix::operator+(const Matrix &mat) const
+    Matrix Matrix::operator+(const Matrix &mat) const
     {
-        check_dimensions(mat);
         return add_matrix(mat);
     }
 
-    Matrix &Matrix::operator+(const double &scalar) const
+    Matrix Matrix::operator+(const double &scalar) const
     {
         return add_scalar(scalar);
     }
 
     Matrix &Matrix::operator+=(const Matrix &mat)
     {
-        check_dimensions(mat);
         *this = *this + mat;
         return *this;
     }
@@ -335,11 +347,11 @@ namespace zich
         return *this;
     }
 
-    Matrix &Matrix::operator++(int a) // a++
+    Matrix Matrix::operator++(int a) // a++
     {
-        Matrix *m = +this;
+        Matrix m = Matrix(*this);
         (*this) += 1;
-        return *m;
+        return m;
     }
 
     Matrix &Matrix::operator++() // ++a
@@ -348,26 +360,24 @@ namespace zich
         return *this;
     }
 
-    Matrix &Matrix::operator-() // unary operator
+    Matrix Matrix::operator-() // unary operator
     {
-        Matrix *m = new Matrix((*this) * -1);
-        return *m;
+        // Matrix m = Matrix((*this) * -1);
+        return (*this) * -1;
     }
 
-    Matrix &Matrix::operator-(const Matrix &mat) const
+    Matrix Matrix::operator-(const Matrix &mat) const
     {
-        check_dimensions(mat);
         return add_matrix(mat * -1); // notice that it's adding the negative.
     }
 
-    Matrix &Matrix::operator-(const double &scalar) const
+    Matrix Matrix::operator-(const double &scalar) const
     {
         return add_scalar(-scalar); // notice that it's adding the negative.
     }
 
     Matrix &Matrix::operator-=(const Matrix &mat)
     {
-        check_dimensions(mat);
         *this = *this - mat;
         return *this;
     }
@@ -378,11 +388,11 @@ namespace zich
         return *this;
     }
 
-    Matrix &Matrix::operator--(int a) // a--
+    Matrix Matrix::operator--(int a) // a--
     {
-        Matrix *m = +this;
+        Matrix m = Matrix(*this);
         (*this) -= 1;
-        return *m;
+        return m;
     }
 
     Matrix &Matrix::operator--() // --a
@@ -391,19 +401,17 @@ namespace zich
         return *this;
     }
 
-    Matrix &Matrix::operator*(const Matrix &mat) const
+    Matrix Matrix::operator*(const Matrix &mat) const
     {
-        check_dimensions(mat);
         return multiply_matrix(mat);
     }
 
-    Matrix &Matrix::operator*(const double &scalar) const
+    Matrix Matrix::operator*(const double &scalar) const
     {
         return multiply_scalar(scalar);
     }
     Matrix &Matrix::operator*=(const Matrix &mat)
     {
-        check_dimensions(mat);
         *this = *this * mat;
         return *this;
     }
@@ -415,49 +423,44 @@ namespace zich
 
     bool Matrix::operator<(const Matrix &mat) const
     {
-        check_dimensions(mat);
         return compare_matrices_by_sign(*this, mat, &__lt__); // passing less then comparison method
     }
     bool Matrix::operator<=(const Matrix &mat) const
     {
-        check_dimensions(mat);
         return compare_matrices_by_sign(*this, mat, &__let__); // passing less equal then comparison method
     }
     bool Matrix::operator==(const Matrix &mat) const
     {
-        check_dimensions(mat);
         return compare_matrices_by_sign(*this, mat, &__eq__); // passing equal to comparison method
     }
     bool Matrix::operator!=(const Matrix &mat) const
     {
-        check_dimensions(mat);
         return compare_matrices_by_sign(*this, mat, &__neq__); // passing not equal to comparison method
     }
     bool Matrix::operator>(const Matrix &mat) const
     {
-        check_dimensions(mat);
         return compare_matrices_by_sign(*this, mat, &__mt__); // passing more then comparison method
     }
     bool Matrix::operator>=(const Matrix &mat) const
     {
-        check_dimensions(mat);
         return compare_matrices_by_sign(*this, mat, &__met__); // passing more equal then comparison method
     }
 
     ostream &operator<<(ostream &out, const Matrix &mat)
     {
-        string mat_str = mat.to_string();
-        return out; // not implemented
+        string mat_str = mat.__tostring__();
+        out << mat_str;
+        return out;
     }
     void operator>>(istream &in, const Matrix &mat)
     {
         // not implemented
     }
-    Matrix &operator*(double num, const Matrix &mat)
+    Matrix operator*(double num, const Matrix &mat)
     {
         return mat * num;
     }
-    Matrix &operator+(int num, const Matrix &mat)
+    Matrix operator+(int num, const Matrix &mat)
     {
         return mat + num;
     }

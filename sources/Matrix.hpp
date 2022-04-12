@@ -55,34 +55,34 @@ namespace zich
 
         double get_element_at(unsigned int row, unsigned int column) const;
         void check_dimensions(const Matrix &mat) const;
-        void check_multiplication_dimensions(const Matrix &mat) const; // different rules when multiplying two matrices
-        Matrix &add_matrix(const Matrix &mat) const;
-        Matrix &add_scalar(const double &scalar) const;
-        Matrix &multiply_matrix(const Matrix &mat) const;
-        Matrix &multiply_scalar(const double &scalar) const;
-        string to_string() const;
+        Matrix add_matrix(const Matrix &mat) const;
+        Matrix add_scalar(const double &scalar) const;
+        Matrix multiply_matrix(const Matrix &mat) const;
+        Matrix multiply_scalar(const double &scalar) const;
+        string __tostring__() const;
+        double sum_matrix() const;
 
         // Matrix & operator () (); // flexible method() decleration example
         Matrix &operator=(const Matrix &mat);
 
-        Matrix &operator+();
-        Matrix &operator+(const Matrix &mat) const;
-        Matrix &operator+(const double &scalar) const;
+        Matrix operator+() const;
+        Matrix operator+(const Matrix &mat) const;
+        Matrix operator+(const double &scalar) const;
         Matrix &operator+=(const Matrix &mat);
         Matrix &operator+=(const double &scalar);
-        Matrix &operator++(int a); // a++
+        Matrix operator++(int a); // a++
         Matrix &operator++();      // ++a
 
-        Matrix &operator-();
-        Matrix &operator-(const Matrix &mat) const;
-        Matrix &operator-(const double &scalar) const;
+        Matrix operator-();
+        Matrix operator-(const Matrix &mat) const;
+        Matrix operator-(const double &scalar) const;
         Matrix &operator-=(const Matrix &mat);
         Matrix &operator-=(const double &scalar);
-        Matrix &operator--(int a); // a--
+        Matrix operator--(int a); // a--
         Matrix &operator--();      //--a
 
-        Matrix &operator*(const Matrix &mat) const;
-        Matrix &operator*(const double &scalar) const;
+        Matrix operator*(const Matrix &mat) const;
+        Matrix operator*(const double &scalar) const;
         Matrix &operator*=(const Matrix &mat);
         Matrix &operator*=(const double &scalar);
 
@@ -100,8 +100,8 @@ namespace zich
         friend std::ostream &operator<<(std::ostream &out, const Matrix &mat);
         friend void operator>>(std::istream &in, const Matrix &mat);
         //friend Matrix &operator*(int num, const Matrix &mat);
-        friend Matrix &operator*(double num, const Matrix &mat);
-        friend Matrix &operator+(int num, const Matrix &mat);
+        friend Matrix operator*(double num, const Matrix &mat);
+        friend Matrix operator+(int num, const Matrix &mat);
     };
 }
 
