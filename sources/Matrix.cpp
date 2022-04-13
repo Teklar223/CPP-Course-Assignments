@@ -66,7 +66,7 @@ namespace zich
         {
             for (unsigned int j = 0; j < col; j++)
             {
-                vec[i][j] = mat.get_element_at(i,j);
+                vec[i][j] = mat.get_element_at(i, j);
             }
         }
 
@@ -125,7 +125,7 @@ namespace zich
         {
             for (unsigned int j = 0; j < col; j++)
             {
-                vec[i][j] = (*this).get_element_at(i,j) + mat.get_element_at(i,j);
+                vec[i][j] = (*this).get_element_at(i, j) + mat.get_element_at(i, j);
             }
         }
         Matrix m = Matrix(vec, row, col);
@@ -142,7 +142,7 @@ namespace zich
         {
             for (unsigned int j = 0; j < col; j++)
             {
-                vec[i][j] = (*this).get_element_at(i,j) + scalar;
+                vec[i][j] = (*this).get_element_at(i, j) + scalar;
             }
         }
         Matrix m = Matrix(vec, row, col);
@@ -170,7 +170,7 @@ namespace zich
 
                 for (unsigned int r = 0; r < mat.get_row(); r++) // this loop is for the row * column multiplication.
                 {
-                    sum += (*this).get_element_at(i,r) * mat.get_element_at(r,j);
+                    sum += (*this).get_element_at(i, r) * mat.get_element_at(r, j);
                 }
 
                 vec[i][j] = sum;
@@ -190,7 +190,7 @@ namespace zich
         {
             for (unsigned int j = 0; j < col; j++)
             {
-                vec[i][j] = (*this).get_element_at(i,j) * scalar;
+                vec[i][j] = (*this).get_element_at(i, j) * scalar;
             }
         }
         Matrix m = Matrix(vec, row, col);
@@ -240,12 +240,13 @@ namespace zich
                     temp += " ";
                 }
                 sub_string = std::to_string((*this).get_element_at(i, j));
-                index = sub_string.find('.',0);
-                sub_string = sub_string.substr(0,index);
+                index = sub_string.find('.', 0);
+                sub_string = sub_string.substr(0, index);
                 temp += sub_string;
             }
             temp += "]";
-            if (i < row-1){
+            if (i < row - 1)
+            {
                 temp += "\n";
             }
             ans += temp;
@@ -282,7 +283,8 @@ namespace zich
                         return false;
                     }
 
-                    if (func(mat1.get_element_at(i, j), mat2.get_element_at(i, j)) && func == __neq__<double>){
+                    if (func(mat1.get_element_at(i, j), mat2.get_element_at(i, j)) && func == __neq__<double>)
+                    {
                         ans = true;
                     }
                 }
@@ -302,12 +304,12 @@ namespace zich
     {
         double sum = 0;
         for (unsigned int i = 0; i < this->row; i++)
+        {
+            for (unsigned int j = 0; j < this->col; j++)
             {
-                for (unsigned int j = 0; j < this->col; j++)
-                {
-                    sum += (*this).get_element_at(i,j);
-                }
+                sum += (*this).get_element_at(i, j);
             }
+        }
         return sum;
     }
 
@@ -452,9 +454,45 @@ namespace zich
         out << mat_str;
         return out;
     }
-    void operator>>(istream &in, const Matrix &mat)
+
+    void operator>>(istream &in, Matrix &mat)
     {
-        // not implemented
+        string in_str(istreambuf_iterator<char>(in), {});
+
+        string blacklist = ", ";
+        string::size_type index = 0; // https://stackoverflow.com/questions/49566816/comparison-of-unsigned-int-is-always-true-npos-issue
+        vector<string> tokens;
+
+        index = in_str.find(blacklist);
+        while (index != string::npos){
+            tokens.push_back(in_str.substr(0, index));
+            in_str = in_str.erase(0, index + 2); // also deletes two more unwatned char's
+            index = in_str.find(blacklist);
+        }
+        tokens.push_back(in_str.substr(0, in_str.size()));
+
+        unsigned int rows = tokens.size();
+        if (rows == 0){
+            throw invalid_argument{"bad input in >> operator."};
+        }
+
+        vector<double> values;
+        for (unsigned int i = 0; i < rows; i++){
+            tokens.at(i).erase(0,1); // erasing the '[' char.
+            tokens.at(i).erase(tokens.at(i).size()-1,1); // erasing the ']' char.
+            tokens.at(i).append(" "); // adding a space for control.
+        }
+        for (unsigned int i = 0; i < rows; i++){
+            index = tokens.at(i).find(' ');
+            while (index != string::npos)
+            {
+                values.push_back(stod(tokens.at(i).substr(0,index)));
+                tokens.at(i) = tokens.at(i).erase(0, index + 1); // like in previous time, but only 1 unwanted char exists.
+            }
+        }
+
+        unsigned int columns = values.size() / rows ;
+        mat = Matrix(values, (int)rows, (int)columns);
     }
     Matrix operator*(double num, const Matrix &mat)
     {

@@ -1,6 +1,6 @@
 #ifndef _MATRIX
 #define _MATRIX
-
+#pragma once
 #include <vector>   // include is here instead of in .cpp - every matrix will need this library!
 #include <iostream> //same
 using namespace std;
@@ -61,6 +61,7 @@ namespace zich
         Matrix multiply_scalar(const double &scalar) const;
         string __tostring__() const;
         double sum_matrix() const;
+        vector<double> tokenize_str_to_vector(istream &in);
 
         // Matrix & operator () (); // flexible method() decleration example
         Matrix &operator=(const Matrix &mat);
@@ -93,13 +94,8 @@ namespace zich
         bool operator>(const Matrix &mat) const;
         bool operator>=(const Matrix &mat) const;
 
-        /**
-         * left all friend method implementation to .cpp files like the other methods.
-         **/
-
         friend std::ostream &operator<<(std::ostream &out, const Matrix &mat);
-        friend void operator>>(std::istream &in, const Matrix &mat);
-        //friend Matrix &operator*(int num, const Matrix &mat);
+        friend void operator>>(std::istream &in, Matrix &mat);
         friend Matrix operator*(double num, const Matrix &mat);
         friend Matrix operator+(int num, const Matrix &mat);
     };
