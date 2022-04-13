@@ -94,8 +94,8 @@ namespace zich
         bool operator>(const Matrix &mat) const;
         bool operator>=(const Matrix &mat) const;
 
-        friend std::ostream &operator<<(std::ostream &out, const Matrix &mat);
-        friend void operator>>(std::istream &in, Matrix &mat);
+        friend ostream &operator<<(ostream &out, const Matrix &mat);
+        friend void operator>>(istream &in, Matrix &mat);
         friend Matrix operator*(double num, const Matrix &mat);
         friend Matrix operator+(int num, const Matrix &mat);
     };

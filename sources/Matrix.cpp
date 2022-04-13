@@ -1,4 +1,5 @@
 #include "Matrix.hpp"
+#include <bits/stdc++.h>
 using namespace zich;
 
 namespace zich
@@ -461,37 +462,79 @@ namespace zich
 
         string blacklist = ", ";
         string::size_type index = 0; // https://stackoverflow.com/questions/49566816/comparison-of-unsigned-int-is-always-true-npos-issue
-        vector<string> tokens;
+        string tokenized;
 
+        in_str.erase(in_str.size() - 1, 1); // erases the '\n'
         index = in_str.find(blacklist);
-        while (index != string::npos){
-            tokens.push_back(in_str.substr(0, index));
+        while (index != string::npos)
+        {
+            tokenized += in_str.substr(0, index);
             in_str = in_str.erase(0, index + 2); // also deletes two more unwatned char's
             index = in_str.find(blacklist);
         }
-        tokens.push_back(in_str.substr(0, in_str.size()));
+        tokenized += in_str.substr(0, in_str.size());
 
-        unsigned int rows = tokens.size();
-        if (rows == 0){
+        unsigned int counter = 1;
+        for (auto &ch : tokenized)
+        {
+            if (ch == ' ')
+            {
+                counter += 1;
+            }
+            if (ch == ']')
+            {
+                break;
+            }
+        }
+        unsigned int columns = counter;
+        if (columns == 1)
+        {
             throw invalid_argument{"bad input in >> operator."};
         }
 
-        vector<double> values;
-        for (unsigned int i = 0; i < rows; i++){
-            tokens.at(i).erase(0,1); // erasing the '[' char.
-            tokens.at(i).erase(tokens.at(i).size()-1,1); // erasing the ']' char.
-            tokens.at(i).append(" "); // adding a space for control.
-        }
-        for (unsigned int i = 0; i < rows; i++){
-            index = tokens.at(i).find(' ');
-            while (index != string::npos)
+        string final_token;
+
+        for (auto &ch : tokenized)
+        {
+
+            if (ch != '[')
             {
-                values.push_back(stod(tokens.at(i).substr(0,index)));
-                tokens.at(i) = tokens.at(i).erase(0, index + 1); // like in previous time, but only 1 unwanted char exists.
+                if (ch == ']')
+                {
+                    final_token += ' ';
+                }
+                else{
+                    final_token += ch;
+                }
             }
         }
 
-        unsigned int columns = values.size() / rows ;
+        // https://www.geeksforgeeks.org/tokenizing-a-string-cpp/
+        
+        vector<string> values_as_string;
+        stringstream check(final_token);
+        string helper;
+
+        while(getline(check, helper, ' '))
+        {
+            values_as_string.push_back(helper);
+        }
+
+        vector<double> values;
+        for(unsigned int i = 0; i < values_as_string.size(); i++){
+            values.push_back(stod(values_as_string.at(i)));
+        }
+
+        if (columns == 0){
+            throw invalid_argument{"bad input in >> operator"};
+        }
+
+        unsigned int rows = values.size()/columns;
+
+        if (rows == 0){
+            throw invalid_argument{"bad input in >> operator"};
+        }
+        
         mat = Matrix(values, (int)rows, (int)columns);
     }
     Matrix operator*(double num, const Matrix &mat)
