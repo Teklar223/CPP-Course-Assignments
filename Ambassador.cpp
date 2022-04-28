@@ -2,15 +2,20 @@
 
 namespace coup
 {
-    Ambassador::Ambassador()
+
+    Ambassador::Ambassador(Game const &game, string name)
     {
+        this->_role = "Ambassador";
+        this->_coins = 0;
+        this->_name = std::move(name);
     }
+
 
     Ambassador::~Ambassador()
     {
     }
 
-    void Ambassador::action(Player player1, Player player2)
+    void Ambassador::transfer(Player const &player1, Player const &player2)
     {
         
     }

@@ -1,13 +1,16 @@
 #pragma once
 #include "Player.hpp"
+#include "Game.hpp"
 
 namespace coup{
-    class Assassin
+    class Assassin : public Player
     {
+    private:
+        int _coins;
+        string _role;
+        string _name;
     public:
-        Assassin();
+        Assassin(Game const &game, string name);
         ~Assassin();
-
-        void action(Player player); //assasinates player for 3 coins instead of 7
     };
 }

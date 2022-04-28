@@ -2,22 +2,36 @@
 
 namespace coup
 {
-    Game::Game(){
+    Game::Game()
+    {
         this->_turn = 0;
         this->_winner = "undefiend";
     }
 
-    Game::~Game(){
-
+    Game::~Game()
+    {
     }
 
-    string Game::players(){
-        return "undefined";
+    void Game::addPlayer(Player const &p)
+    {
+        this->_players.push_back(p);
     }
-    int Game::turn(){
+
+    vector<string> Game::players()
+    {
+        vector<string> v;
+        for (unsigned int i = 0; i < this->_players.size(); i++)
+        {
+            v.push_back(this->_players.at(i).name());
+        }
+        return v;
+    }
+    int Game::turn() const
+    {
         return this->_turn;
     }
-    string Game::winner(){
+    string Game::winner()
+    {
         return this->_winner;
     }
 }

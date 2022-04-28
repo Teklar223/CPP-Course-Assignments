@@ -10,17 +10,20 @@ namespace coup
     private:
         int _coins;
         string _role;
+        string _name;
 
     public:
-        Player();
+        Player(string role ="undefined", string name = "undefined");
 
         ~Player();
 
         void income();
         void foreign_aid();
-        void coup();
+        void coup(Player const &player);
 
-        string role();
-        int coins();
+        string name() const;
+        string role() const;
+        int coins() const;
+        void block(Player const &player);
     };
 }

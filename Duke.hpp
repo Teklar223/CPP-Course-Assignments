@@ -1,12 +1,18 @@
 #pragma once
+#include "Player.hpp"
+#include "Game.hpp"
 
 namespace coup{
-    class Duke
+    class Duke : public Player
     {
+    private:
+        int _coins;
+        string _role;
+        string _name;
     public:
-        Duke();
+        Duke(Game const &game, string name);
         ~Duke();
 
-        void action(); //takes three coins
+        void tax(); //takes three coins
     };
 }

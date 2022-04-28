@@ -1,12 +1,9 @@
 #pragma once
 #include "Player.hpp"
-#include "Ambassador.hpp"
-#include "Captain.hpp"
-#include "Contessa.hpp"
-#include "Assassin.hpp"
-#include "Duke.hpp"
 #include <string>
+#include <vector>
 using std::string;
+using std::vector;
 
 namespace coup
 {
@@ -17,18 +14,14 @@ namespace coup
         vector<Player> _players;
         int _turn;
         string _winner;
-
-        void addPlayer(Player p){
-            this->_players.push_back(p);
-        }
-
     public:
         Game();
 
         ~Game();
 
-        string players();
-        int turn();
+        void addPlayer(Player const &p);
+        vector<string> players();
+        int turn() const;
         string winner();
     };
 }
