@@ -13,7 +13,7 @@ using namespace coup;
 TEST_CASE("BAD INPUT")
 {
 
-    SUBCASE("Game")
+    SUBCASE("Coup")
     {
 
         Game game_1;
