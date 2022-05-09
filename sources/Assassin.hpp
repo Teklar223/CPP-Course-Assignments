@@ -7,6 +7,6 @@ namespace coup
     {
     public:
         Assassin(Game &game, string name);
-        void coup(Player &player); // overloads from parent class, this takes 3 coins instead of 7.
+        void coup(Player &player) override; // overloads from parent class, this takes 3 coins instead of 7.
     };
 }

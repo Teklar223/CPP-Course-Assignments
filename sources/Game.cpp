@@ -36,10 +36,95 @@ namespace coup
 
     void Player::init_turn()
     {
-        this->_action = false;
-        this->_foraid = false;
-        this->assassinated.clear();
-        this->stolefrom.clear();
+        if((*this->_game).turn() != this->name()){
+            if ((*(*this->_game).getCurrentPlayer()).getBlocked())
+            {
+                (*this->_game).inc_turn();
+            }
+        }
+
+        if (!(*this->_game).has_started())
+        {
+            if ((*this->_game).players().size() > 1)
+            {
+                (*this->_game).start_game();
+            }
+            else
+            {
+                throw invalid_argument{"cant start game with just one player... waiting for more!"};
+            }
+        }
+
+        if (!(*this->_game).is_enough_players())
+        {
+            throw invalid_argument{"need at least 2 players to play the game!"};
+        }
+
+        if ((*this->_game).is_game_over())
+        {
+            throw invalid_argument{"A winner was already declared!"};
+        }
+
+        if ((*this->_game).turn() == this->_name)
+        {
+            if (this->_coins >= MUST_COUP)
+            {
+                throw invalid_argument{"A player with at least 10 coins must coup!"};
+            }
+            this->_action = false;
+            this->_foraid = false;
+            this->blocked = false;
+            this->assassinated.clear();
+            this->stolefrom.clear();
+        }
+        else
+        {
+            throw invalid_argument{"Not this players turn yet!!!"};
+        }
+    }
+
+    void Player::init_turn_free_action()
+    {
+        if (!(*this->_game).has_started())
+        {
+            if ((*this->_game).players().size() > 1)
+            {
+                (*this->_game).start_game();
+            }
+            else
+            {
+                throw invalid_argument{"cant start game with just one player... waiting for more!"};
+            }
+        }
+
+        if (!(*this->_game).is_enough_players())
+        {
+            throw invalid_argument{"need at least 2 players to play the game!"};
+        }
+
+        if ((*this->_game).is_game_over())
+        {
+            throw invalid_argument{"A winner was already declared!"};
+        }
+
+        if ((*this->_game).turn() == this->_name)
+        {
+            this->_action = false;
+            this->_foraid = false;
+            this->blocked = false;
+            this->assassinated.clear();
+            this->stolefrom.clear();
+        }
+        else
+        {
+            /*
+            if ((*(*this->_game).getCurrentPlayer()).getBlocked())
+            {
+                (*this->_game).inc_turn();
+                this->init_turn_free_action();
+            }*/
+            throw invalid_argument{"Not this players turn yet!!!"};
+        }
     }
 
     bool Player::getDefeated() const
@@ -50,6 +135,19 @@ namespace coup
     void Player::setDefeated(bool val)
     {
         this->defeated = val;
+        if (val)
+        {
+            (*this->_game).inc_defeated();
+        }
+        else
+        {
+            (*this->_game).dec_defeated();
+        }
+
+        if ((*this->_game).players().size() == 1)
+        {
+            (*this->_game).declareWinner((*this->_game).players().at(0));
+        }
     }
 
     void Player::income()
@@ -70,7 +168,12 @@ namespace coup
     void Player::coup(Player &player)
     {
 
-        this->init_turn();
+        this->init_turn_free_action();
+
+        if (player.getDefeated())
+        {
+            throw invalid_argument{"That player is already out of the game!"};
+        }
 
         if (this->_coins >= COUP_COINS)
         {
@@ -110,6 +213,16 @@ namespace coup
         this->stolefrom.clear();
     }
 
+    bool Player::getBlocked() const
+    {
+        return this->blocked;
+    }
+
+    void Player::setBlocked(bool val)
+    {
+        this->blocked = val;
+    }
+
     Player &Player::getAssassinated()
     {
         return this->assassinated.at(1);
@@ -126,12 +239,17 @@ namespace coup
     {
         this->_turn = 0;
         this->_defeatedPlayers = 0;
-        this->_activePlayers = 0;
-        this->_winner = "undefiend";
+        this->_started = false;
+        this->_winner = "_";
     }
 
     void Game::addPlayer(Player *player)
     {
+        if (this->_started)
+        {
+            throw invalid_argument{"cant add a player to an ongoing match!"};
+        }
+
         if (this->_players.size() < MAX_PLAYERS)
         {
             this->_players.push_back(player);
@@ -142,24 +260,8 @@ namespace coup
         }
     }
 
-    /*
-    void Game::removePlayer(string const &name)
-    {
-        TODO:
-        for (std::vector<string>::iterator it = this->_players.begin(); it != this->_players.end(); )
-        {
-            if (*it == name)
-            {
-                this->_players.erase(it);
-                it = this->_players.end(); //efectively breaking.
-            }
-        }
-    }
-    */
-
     vector<string> Game::players() const
     {
-        // TODO:return this->_players;
         vector<string> ans;
         for (unsigned int i = 0; i < this->_players.size(); i++)
         {
@@ -179,9 +281,9 @@ namespace coup
 
     string Game::winner() const
     {
-        if (this->_winner == "undefined")
+        if (this->_winner == "_")
         {
-            throw std::invalid_argument{"Game is not over yet!"};
+            throw invalid_argument{"Game is not over yet!"};
         }
 
         return this->_winner;
@@ -190,26 +292,68 @@ namespace coup
     void Game::inc_turn()
     {
         unsigned int mod = this->_players.size();
-        /*
-        if (mod == 0){
-            mod++;
-        }
-        */
-        unsigned int i = 0;
-        while ((*this->_players.at(this->_turn)).getDefeated()) // will happen at most 6 times
+        this->_turn = (this->_turn + 1) % mod;
+
+        while ((*this->_players.at(this->_turn)).getDefeated()) // will happen at most 6 times, getDefeated return true if player is defeated.
         {
-            if (i == MAX_PLAYERS)
-            { // brute forcing that ensures this breaks.
-                if (!(*this->_players.at(i)).getDefeated())
-                {
-                    this->_winner = (*this->_players.at(i)).name();
-                }
-                else
-                {
-                    throw invalid_argument{"HOW IS EVERYONE DEFEATED????????"};
-                }
-            }
             this->_turn = (this->_turn + 1) % mod;
         }
+    }
+
+    void Game::declareWinner(string const &name)
+    {
+        this->_winner = name;
+    }
+
+    unsigned int Game::getDefeated() const
+    {
+        return this->_defeatedPlayers;
+    }
+
+    void Game::inc_defeated()
+    {
+        this->_defeatedPlayers += 1;
+    }
+    void Game::dec_defeated()
+    {
+        this->_defeatedPlayers -= 1;
+    }
+
+    bool Game::is_game_over() const
+    {
+        bool ans = true;
+
+        if (this->_winner != "_")
+        {
+            return ans;
+        }
+
+        return !ans;
+    }
+
+    bool Game::is_enough_players() const
+    {
+        bool ans = true;
+        if (this->_players.size() == 1)
+        {
+            return !ans;
+        }
+
+        return ans;
+    }
+
+    bool Game::has_started() const
+    {
+        return this->_started;
+    }
+
+    void Game::start_game()
+    {
+        this->_started = true;
+    }
+
+    Player *Game::getCurrentPlayer() const
+    {
+        return this->_players.at(this->_turn);
     }
 }

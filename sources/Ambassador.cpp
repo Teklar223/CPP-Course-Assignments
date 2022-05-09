@@ -29,7 +29,7 @@ namespace coup
 
     void Ambassador::block(Player &player)
     {
-        this->init_turn();
+        this->init_turn_free_action();
         if (player.role() == "Captain"){
             if (player.getAction()){
                 player.setAction();

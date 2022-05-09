@@ -60,6 +60,6 @@ namespace coup
         {
             throw std::invalid_argument{"can only block other captains."};
         }
-        (*this->_game).inc_turn();
+        //TODO: (*this->_game).inc_turn();
     }
 }
