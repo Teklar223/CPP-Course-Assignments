@@ -34,17 +34,8 @@ namespace coup
         this->_coins -= num;
     }
 
-    void Player::init_turn(string action)
+    void Player::init_turn(string const &action)
     {
-        if((*this->_game).turn() != this->name()){
-            if((*(*this->_game).getCurrentPlayer()).getBlocked()){
-                (*this->_game).inc_turn();
-            }
-            else
-            {
-                //throw invalid_argument{"basa"};
-            }
-        }
 
         if (!(*this->_game).has_started())
         {
@@ -70,7 +61,7 @@ namespace coup
 
         if ((*this->_game).turn() == this->_name)
         {
-            if (this->_coins >= MUST_COUP && (action == "ncob" || action == "block"))
+            if (this->_coins >= MUST_COUP && (action == "ncob"))
             {
                 throw invalid_argument{"A player with at least 10 coins must coup!"};
             }
@@ -111,14 +102,14 @@ namespace coup
 
     void Player::income()
     {
-        this->init_turn();
+        this->init_turn("ncob");
         this->_coins += 1;
         (*this->_game).inc_turn();
     }
 
     void Player::foreign_aid()
     {
-        this->init_turn();
+        this->init_turn("ncob");
         this->_coins += 2;
         this->_foraid = true;
         (*this->_game).inc_turn();

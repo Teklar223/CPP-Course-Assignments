@@ -17,13 +17,12 @@ namespace coup
 
     void Duke::tax()
     {
-        this->init_turn();
+        this->init_turn("ncob");
         this->_coins += 3;
         (*this->_game).inc_turn();
     }
 
     void Duke::block(Player &player){
-        this->init_turn("block");
         if(player.getForaid()){
             player.setForaid();
             player.subCoins(2);
@@ -32,6 +31,5 @@ namespace coup
             throw std::invalid_argument{"cant block that player since he did not use foreign aid this round."};
         }
         this->blocked = true;
-        //TODO: (*this->_game).inc_turn();
     }
 }

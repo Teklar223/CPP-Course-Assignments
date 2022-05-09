@@ -16,7 +16,7 @@ namespace coup
 
     void Ambassador::transfer(Player &player1, Player &player2)
     {
-        this->init_turn();
+        this->init_turn("ncob");
         if (player1.coins() >=1){
             player1.subCoins(1);
             player2.addCoins(1);
@@ -29,7 +29,6 @@ namespace coup
 
     void Ambassador::block(Player &player)
     {
-        this->init_turn("block");
         if (player.role() == "Captain"){
             if (player.getAction()){
                 player.setAction();
@@ -45,6 +44,5 @@ namespace coup
             throw std::invalid_argument{"can only block captains."};
         }
         this->blocked = true;
-        //(*this->_game).inc_turn();
     }
 }
