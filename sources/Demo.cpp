@@ -5,7 +5,6 @@
  * @since: 2022-02
  */
 
-#include "Player.hpp"
 #include "Duke.hpp"
 #include "Assassin.hpp"
 #include "Ambassador.hpp"
@@ -19,9 +18,9 @@ using namespace coup;
 
 #include <iostream>
 #include <stdexcept>
-//#include <vector>
-//using namespace std;
-//
+#include <vector>
+using namespace std;
+
 //int main() {
 //
 //	Game game_1{};
@@ -36,7 +35,6 @@ using namespace coup;
 //	
 //
 //	vector<string> players = game_1.players();
-//
 //	/*
 //		prints:
 //		Moshe

@@ -1,5 +1,5 @@
 #pragma once
-#include "Player.hpp"
+#include "Game.hpp"
 
 namespace coup{
     class Contessa : public Player

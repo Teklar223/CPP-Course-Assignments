@@ -1,6 +1,5 @@
 #pragma once
-#include "Player.hpp"
-#include <map>
+#include "Game.hpp"
 
 namespace coup
 {

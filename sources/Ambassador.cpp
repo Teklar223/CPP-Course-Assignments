@@ -4,14 +4,14 @@ namespace coup
 {
     Ambassador::Ambassador(Game &game, string name)
     {
-        game.addPlayer(name);
         this->_coins = 0;
         this->_name = std::move(name);
         this->_action = false;
         this->_foraid = false;
-        this->_game = game;
+        this->_game = &game;
         this->_role = "Ambassador";
         this->defeated = false;
+        game.addPlayer(this);
     }
 
     void Ambassador::transfer(Player &player1, Player &player2)
@@ -24,7 +24,7 @@ namespace coup
         else{
             throw std::invalid_argument{"player has no coins to transfer..."};
         }
-        this->_game.inc_turn();
+        (*this->_game).inc_turn();
     }
 
     void Ambassador::block(Player &player)
@@ -44,6 +44,6 @@ namespace coup
         else{
             throw std::invalid_argument{"can only block captains."};
         }
-        this->_game.inc_turn();
+        (*this->_game).inc_turn();
     }
 }

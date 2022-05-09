@@ -4,14 +4,14 @@ namespace coup
 {
     Captain::Captain(Game &game, string name)
     {
-        game.addPlayer(name);
         this->_coins = 0;
         this->_name = std::move(name);
         this->_action = false;
         this->_foraid = false;
-        this->_game = game;
+        this->_game = &game;
         this->_role = "Captain";
         this->defeated = false;
+        game.addPlayer(this);
     }
 
     void Captain::steal(Player &player)
@@ -25,9 +25,18 @@ namespace coup
         }
         else
         {
-            throw std::invalid_argument{"player has less than 2 coins..."};
+            if (player.coins() == 1)
+            {
+                player.subCoins(1);
+                this->stolefrom.insert({1, player});
+                this->_coins += 1;
+            }
+            else
+            {
+                this->stolefrom.insert({1, player});
+            }
         }
-        this->_game.inc_turn();
+        (*this->_game).inc_turn();
     }
 
     void Captain::block(Player &player)
@@ -51,6 +60,6 @@ namespace coup
         {
             throw std::invalid_argument{"can only block other captains."};
         }
-        this->_game.inc_turn();
+        (*this->_game).inc_turn();
     }
 }

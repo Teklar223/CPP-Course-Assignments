@@ -5,14 +5,14 @@ namespace coup
 
     Contessa::Contessa(Game &game, string name)
     {
-        game.addPlayer(name);
         this->_coins = 0;
         this->_name = std::move(name);
         this->_action = false;
         this->_foraid = false;
-        this->_game = game;
+        this->_game = &game;
         this->_role = "Contessa";
         this->defeated = false;
+        game.addPlayer(this);
     }
 
     void Contessa::block(Player &player)
@@ -25,7 +25,6 @@ namespace coup
                 player.setAction();
                 player.addCoins(3);
                 player.getAssassinated().setDefeated(false);
-                this->_game.addPlayer(player.getAssassinated().name());
                 player.clearAssassinated();
             }
             else
@@ -37,6 +36,6 @@ namespace coup
         {
             throw std::invalid_argument{"The Contessa can only block assassins."};
         }
-        this->_game.inc_turn();
+        (*this->_game).inc_turn();
     }
 }
