@@ -41,7 +41,7 @@ namespace coup
 
     void Captain::block(Player &player)
     {
-        this->init_turn();
+        this->init_turn("block");
         if (player.role() == "Captain")
         {
             if (player.getAction())
@@ -60,6 +60,7 @@ namespace coup
         {
             throw std::invalid_argument{"can only block other captains."};
         }
+        this->blocked = true;
         //TODO: (*this->_game).inc_turn();
     }
 }

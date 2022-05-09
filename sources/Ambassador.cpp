@@ -29,7 +29,7 @@ namespace coup
 
     void Ambassador::block(Player &player)
     {
-        this->init_turn_free_action();
+        this->init_turn("block");
         if (player.role() == "Captain"){
             if (player.getAction()){
                 player.setAction();
@@ -44,6 +44,7 @@ namespace coup
         else{
             throw std::invalid_argument{"can only block captains."};
         }
-        (*this->_game).inc_turn();
+        this->blocked = true;
+        //(*this->_game).inc_turn();
     }
 }

@@ -27,8 +27,7 @@ namespace coup
         bool blocked;
         std::map<int, Player &> assassinated;
         std::map<int, Player &> stolefrom;
-        void init_turn();
-        void init_turn_free_action();
+        void init_turn(string action = "ncob"); //not coup or block.
 
     public:
         bool getDefeated() const;

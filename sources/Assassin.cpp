@@ -16,7 +16,13 @@ namespace coup
 
     void Assassin::coup(Player &player)
     {
-        this->init_turn_free_action();
+        this->init_turn("coup");
+
+        if (player.getDefeated())
+        {
+            throw invalid_argument{"That player is already out of the game!"};
+        }
+
         if (this->_coins >= COUP_COINS)
         {
             this->_coins -= COUP_COINS;

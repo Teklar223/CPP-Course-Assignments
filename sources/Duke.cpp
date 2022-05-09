@@ -23,7 +23,7 @@ namespace coup
     }
 
     void Duke::block(Player &player){
-        this->init_turn();
+        this->init_turn("block");
         if(player.getForaid()){
             player.setForaid();
             player.subCoins(2);
@@ -31,6 +31,7 @@ namespace coup
         else{
             throw std::invalid_argument{"cant block that player since he did not use foreign aid this round."};
         }
-        (*this->_game).inc_turn();
+        this->blocked = true;
+        //TODO: (*this->_game).inc_turn();
     }
 }

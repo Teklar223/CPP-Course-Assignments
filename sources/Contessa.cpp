@@ -17,7 +17,7 @@ namespace coup
 
     void Contessa::block(Player &player)
     {
-        this->init_turn_free_action();
+        this->init_turn("block");
         if (player.role() == "Assassin")
         {
             if (player.getAction())
@@ -36,6 +36,7 @@ namespace coup
         {
             throw std::invalid_argument{"The Contessa can only block assassins."};
         }
+        this->blocked = true;
         //TODO: (*this->_game).inc_turn();
     }
 }

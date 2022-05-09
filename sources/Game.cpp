@@ -34,12 +34,15 @@ namespace coup
         this->_coins -= num;
     }
 
-    void Player::init_turn()
+    void Player::init_turn(string action)
     {
         if((*this->_game).turn() != this->name()){
-            if ((*(*this->_game).getCurrentPlayer()).getBlocked())
-            {
+            if((*(*this->_game).getCurrentPlayer()).getBlocked()){
                 (*this->_game).inc_turn();
+            }
+            else
+            {
+                //throw invalid_argument{"basa"};
             }
         }
 
@@ -67,7 +70,7 @@ namespace coup
 
         if ((*this->_game).turn() == this->_name)
         {
-            if (this->_coins >= MUST_COUP)
+            if (this->_coins >= MUST_COUP && (action == "ncob" || action == "block"))
             {
                 throw invalid_argument{"A player with at least 10 coins must coup!"};
             }
@@ -79,50 +82,6 @@ namespace coup
         }
         else
         {
-            throw invalid_argument{"Not this players turn yet!!!"};
-        }
-    }
-
-    void Player::init_turn_free_action()
-    {
-        if (!(*this->_game).has_started())
-        {
-            if ((*this->_game).players().size() > 1)
-            {
-                (*this->_game).start_game();
-            }
-            else
-            {
-                throw invalid_argument{"cant start game with just one player... waiting for more!"};
-            }
-        }
-
-        if (!(*this->_game).is_enough_players())
-        {
-            throw invalid_argument{"need at least 2 players to play the game!"};
-        }
-
-        if ((*this->_game).is_game_over())
-        {
-            throw invalid_argument{"A winner was already declared!"};
-        }
-
-        if ((*this->_game).turn() == this->_name)
-        {
-            this->_action = false;
-            this->_foraid = false;
-            this->blocked = false;
-            this->assassinated.clear();
-            this->stolefrom.clear();
-        }
-        else
-        {
-            /*
-            if ((*(*this->_game).getCurrentPlayer()).getBlocked())
-            {
-                (*this->_game).inc_turn();
-                this->init_turn_free_action();
-            }*/
             throw invalid_argument{"Not this players turn yet!!!"};
         }
     }
@@ -168,7 +127,7 @@ namespace coup
     void Player::coup(Player &player)
     {
 
-        this->init_turn_free_action();
+        this->init_turn("coup");
 
         if (player.getDefeated())
         {
