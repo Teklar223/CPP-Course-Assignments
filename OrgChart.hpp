@@ -16,9 +16,8 @@ namespace ariel
         // *** Inner Classes *** //
 
     private:
-        class node
+        struct node
         {
-            public:
             string val;
             bool visited = false;
             node *parent = nullptr; // represents the boss
@@ -27,7 +26,7 @@ namespace ariel
             node *left = nullptr;   // represents same-level co-worker
             node *right = nullptr;  // ^    ^    ^    ^    ^    ^    ^
 
-            node(string const &value) : val(value) {}
+            node(string &value) : val(value) {}
         };
 
     public:
@@ -40,10 +39,10 @@ namespace ariel
             string type; // expects level, reverse, or pre, see iterator implementations at the bottom of this file.
 
         public:
-            Iterator(node *init, string _type)
+            Iterator(node *&init, string _type = "level")
                 : curr(init), type(_type), next(init->head)
             {
-                if (type == "reverse") // slightly different logic then the other cases.
+                if (type == "reverse") // different logic then the other cases.
                 {
                     while (curr->head != nullptr)
                     {
@@ -57,6 +56,7 @@ namespace ariel
             Iterator &operator++()
             {
 
+                return *this;
                 this->curr = nullptr; // REMOVE THIS, patchwork to stop iterators early for demo runtime.
 
                 if (this->type == "level")
@@ -85,16 +85,21 @@ namespace ariel
 
             string *operator->()
             {
+                string *temp = &this->curr->val;
+                return temp;
                 return &(curr->val);
             }
 
-            string &operator*()
+            string operator*()
             {
-                return (*curr).val;
+                string temp = "WIP";
+                return temp;
+                return curr->val;
             }
 
             bool operator==(const Iterator &other) const
             {
+                return false;
                 return this->curr == other.curr;
             }
 
@@ -106,10 +111,11 @@ namespace ariel
 
         // *** Types and Functions *** //
     private:
+        // TODO: employee list and root are privates.
+    public:
         node *root;
         map<string, node *> employee_list;
 
-    public:
         OrgChart()
             : root(nullptr)
         {
@@ -122,10 +128,15 @@ namespace ariel
 
         OrgChart &add_root(string value)
         {
-            // TODO: error checking?
-
-            this->root = new node(value);
-            this->employee_list.insert({value, this->root}); // this is for the add_sub logic later.
+            if (this->root == nullptr)
+            {
+                this->root = new node(value);
+                this->employee_list.insert({value, this->root}); // this is for the add_sub logic later.
+            }
+            else
+            {
+                this->root->val = value;
+            }
 
             return *this;
         }
@@ -142,17 +153,34 @@ namespace ariel
                 boss->tail = employee;
                 if (boss->left != nullptr)
                 {
-                    employee->left = boss->left->tail;
+                    node *curr = boss->left;
+                    while (curr->head != nullptr && curr != nullptr)
+                    {
+                        curr = curr->left;
+                    }
+                    if (curr != nullptr)
+                    {
+                        employee->left = boss->left->tail;
+                    }
                 }
                 if (boss->right != nullptr)
                 {
-                    employee->right = boss->right->head;
+                    node *curr = boss->right;
+                    while (curr->head != nullptr && curr != nullptr)
+                    {
+                        curr = curr->right;
+                    }
+                    if (curr != nullptr)
+                    {
+                        employee->right = boss->right->head;
+                    }
                 }
             }
             else // list grows from tail.
             {
                 employee->left = boss->tail;
                 employee->right = boss->tail->right;
+                boss->tail->right = employee;
                 boss->tail = employee;
             }
 
@@ -160,9 +188,14 @@ namespace ariel
             return *this;
         }
 
+        /*
         Iterator begin() { return (Iterator(this->root, "level")); }
 
-        Iterator end() { return (Iterator(nullptr, "level")); }
+        Iterator end()
+        {
+            node *temp = nullptr;
+            return (Iterator(temp, "level"));
+        }
 
         Iterator begin_level_order() { return begin(); }
 
@@ -170,11 +203,40 @@ namespace ariel
 
         Iterator begin_reverse_order() { return (Iterator(this->root, "reverse")); }
 
-        Iterator reverse_order() { return (Iterator(nullptr, "reverse")); } // int* end_reverse_order(); ?
+        Iterator reverse_order()
+        {
+            node *temp = nullptr;
+            return (Iterator(temp, "reverse"));
+        } // int* end_reverse_order(); ?
 
         Iterator begin_preorder() { return (Iterator(this->root, "pre")); }
 
-        Iterator end_preorder() { return (Iterator(nullptr, "pre")); }
+        Iterator end_preorder()
+        {
+            node *temp = nullptr;
+            return (Iterator(temp, "pre"));
+        }
+        */
+        string *begin()
+        {
+            string *temp = (string *)malloc(sizeof("WIP"));
+            *temp = "WIP";
+            return temp;
+        }
+
+        string *end() { return begin(); }
+
+        string *begin_level_order() { return nullptr; }
+
+        string *end_level_order() { return nullptr; }
+
+        string *begin_reverse_order() { return nullptr; }
+
+        string *reverse_order() { return nullptr; }
+
+        string *begin_preorder() { return nullptr; }
+
+        string *end_preorder() { return nullptr; }
 
         friend std::ostream &operator<<(std::ostream &out, const OrgChart &org)
         {

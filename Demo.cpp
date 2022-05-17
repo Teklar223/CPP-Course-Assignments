@@ -35,8 +35,14 @@ int main()
        |                 |
        VP_SW             VP_BI
  */
-  cout << "4" << endl;
-  
+  cout << organization.root->val << " " << organization.root->head->right->val << endl;
+  cout << organization.root->val << " " << organization.root->head->head->val << endl;
+
+  for (auto it = organization.employee_list.begin(); it != organization.employee_list.end(); it++)
+  {
+    cout << (*it).first << ", ";
+  }
+
   for (auto it = organization.begin_level_order(); it != organization.end_level_order(); ++it)
   {
     cout << (*it) << " ";
