@@ -30,55 +30,109 @@ namespace ariel
         };
 
     public:
-        class Iterator // with the help of https://www.youtube.com/watch?v=F9eDv-YIOQ0&ab_channel=TheCherno
+        class Iterator // with the help of https://www.youtube.com/watch?v=F9eDv-YIOQ0&ab_channel=TheCherno and similar sources (google)
         {
 
         private:
-            node *curr;
             node *next;
             string type; // expects level, reverse, or pre, see iterator implementations at the bottom of this file.
 
         public:
-            Iterator(node *&init, string _type = "level")
-                : curr(init), type(_type), next(init->head)
+            node *curr; // TODO PRIVATE
+            Iterator(node *init, string _type = "level")
+                : curr(init), type(_type)
             {
-                if (type == "reverse") // different logic then the other cases.
+                if (init != nullptr)
                 {
-                    while (curr->head != nullptr)
-                    {
-                        curr = curr->head;
-                    }
+                    next = init->head; // not part of the initialization list, because init can be null, and thus we cant access this member without segfaulting.
 
-                    next = curr->parent;
+                    if (type == "reverse") // different start offset then the other cases, can only if init is not a nullptr.
+                    {
+                        while (curr->head != nullptr)
+                        {
+                            curr = curr->head;
+                        }
+
+                        next = curr->parent;
+                    }
                 }
             }
 
             Iterator &operator++()
             {
-
-                return *this;
-                this->curr = nullptr; // REMOVE THIS, patchwork to stop iterators early for demo runtime.
-
-                if (this->type == "level")
+                if (curr != nullptr)
                 {
-                    // TODO
-                }
+                    if (this->type == "level")
+                    {
+                        if (curr->right != nullptr)
+                        {
+                            curr = curr->right;
+                        }
+                        else
+                        {
+                            curr = next;
+                            if (curr != nullptr)
+                            {
+                                next = curr->head;
+                                // TODO: more rigourous logic for the next (in cases where curr.head is empty but curr.right.right.head exists for example)????
+                            }
+                        }
+                    }
 
-                if (this->type == "reverse")
-                {
-                    // TODO
-                }
+                    if (this->type == "reverse")
+                    {
+                        if (curr->right != nullptr)
+                        {
+                            curr = curr->right;
+                        }
+                        else
+                        {
+                            curr = next;
+                            if (curr != nullptr)
+                            {
+                                next = curr->parent;
+                                // TODO: more rigourous logic for the next (in the constructor for this case!)???????
+                            }
+                        }
+                    }
 
-                if (this->type == "pre")
-                {
-                    // TODO
+                    if (this->type == "pre")
+                    {
+                        curr->visited = true;
+                        if (curr->head != nullptr)
+                        {
+                            curr = curr->head;
+                        }
+                        else if (curr->right != nullptr)
+                        {
+                            if (curr->right->parent->val == curr->parent->val)
+                            {
+                                curr = curr->right;
+                            }
+                            else
+                            {
+                                while (curr->right->parent->val != curr->parent->val)
+                                {
+                                    curr = curr->parent;
+                                }
+                                if (curr->right != nullptr)
+                                {
+                                    curr = curr->right;
+                                }
+                            }
+                        }
+                        else // this means the iterator reached the 'bottom right' member and has therefore finished the preoder
+                        {
+                            curr = nullptr;
+                        }
+                    }
                 }
                 return *this;
             }
 
             Iterator operator++(int)
             {
-                Iterator it = Iterator(this->curr, this->type); // TODO: test that this is correct.
+                Iterator it = Iterator(this->curr, this->type);
                 ++(*this);
                 return it;
             }
@@ -92,15 +146,25 @@ namespace ariel
 
             string operator*()
             {
-                string temp = "WIP";
-                return temp;
-                return curr->val;
+                return (*curr).val;
             }
 
             bool operator==(const Iterator &other) const
             {
-                return false;
-                return this->curr == other.curr;
+
+                bool ans = true;
+                if (this->curr == nullptr || other.curr == nullptr)
+                {
+                    if (this->curr == nullptr && other.curr == nullptr)
+                    {
+                        return ans; // curenntly true.
+                    }
+                    else
+                    {
+                        return !ans;
+                    }
+                }
+                return (this->curr == other.curr);
             }
 
             bool operator!=(const Iterator &other) const
@@ -111,11 +175,10 @@ namespace ariel
 
         // *** Types and Functions *** //
     private:
-        // TODO: employee list and root are privates.
-    public:
         node *root;
         map<string, node *> employee_list;
 
+    public:
         OrgChart()
             : root(nullptr)
         {
@@ -147,32 +210,34 @@ namespace ariel
             node *employee = new node(value);
             employee->parent = boss;
 
-            if (boss->head == nullptr) // if head is empty tail is also empty.
+            if (boss->head == nullptr) // if node has no children nodes, also if head is empty tail is also empty.
             {
                 boss->head = employee;
                 boss->tail = employee;
                 if (boss->left != nullptr)
                 {
                     node *curr = boss->left;
-                    while (curr->head != nullptr && curr != nullptr)
+                    while (curr != nullptr && curr->head == nullptr)
                     {
                         curr = curr->left;
                     }
                     if (curr != nullptr)
                     {
-                        employee->left = boss->left->tail;
+                        employee->left = curr->tail;
+                        curr->tail->right = employee;
                     }
                 }
                 if (boss->right != nullptr)
                 {
                     node *curr = boss->right;
-                    while (curr->head != nullptr && curr != nullptr)
+                    while (curr != nullptr && curr->head == nullptr)
                     {
                         curr = curr->right;
                     }
                     if (curr != nullptr)
                     {
-                        employee->right = boss->right->head;
+                        employee->right = curr->head;
+                        curr->head->left = employee;
                     }
                 }
             }
@@ -188,7 +253,6 @@ namespace ariel
             return *this;
         }
 
-        /*
         Iterator begin() { return (Iterator(this->root, "level")); }
 
         Iterator end()
@@ -216,31 +280,30 @@ namespace ariel
             node *temp = nullptr;
             return (Iterator(temp, "pre"));
         }
-        */
-        string *begin()
+
+        friend std::ostream &operator<<(std::ostream &out, OrgChart &org)
         {
-            string *temp = (string *)malloc(sizeof("WIP"));
-            *temp = "WIP";
-            return temp;
-        }
-
-        string *end() { return begin(); }
-
-        string *begin_level_order() { return nullptr; }
-
-        string *end_level_order() { return nullptr; }
-
-        string *begin_reverse_order() { return nullptr; }
-
-        string *reverse_order() { return nullptr; }
-
-        string *begin_preorder() { return nullptr; }
-
-        string *end_preorder() { return nullptr; }
-
-        friend std::ostream &operator<<(std::ostream &out, const OrgChart &org)
-        {
-            out << "NOT IMPLEMENTED"; // TODO
+            out << org.root->val << "|\n";
+            node *curr = org.root->head;
+            node *next = curr->head;
+            while (curr != nullptr)
+            {
+                out << curr->val << "(" << curr->parent->val << ") | " ;
+                if (curr->right != nullptr)
+                {
+                    curr = curr->right;
+                }
+                else
+                {
+                    out << '\n';
+                    curr = next;
+                    if (curr != nullptr)
+                    {
+                        next = curr->head;
+                        // TODO: if the level order does need more grigours next logic, implement here too.
+                    }
+                }
+            }
             return out;
         }
     };
