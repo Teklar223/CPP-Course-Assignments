@@ -34,11 +34,11 @@ namespace ariel
         {
 
         private:
+            node *curr;
             node *next;
             string type; // expects level, reverse, or pre, see iterator implementations at the bottom of this file.
 
         public:
-            node *curr; // TODO PRIVATE
             Iterator(node *init, string _type = "level")
                 : curr(init), type(_type)
             {
@@ -56,6 +56,10 @@ namespace ariel
                         next = curr->parent;
                     }
                 }
+            }
+
+            ~Iterator()
+            {
             }
 
             Iterator &operator++()
@@ -184,9 +188,14 @@ namespace ariel
         {
         }
 
-        ~OrgChart()
-        {
-            // TODO.
+        ~OrgChart(){
+            for(auto element : employee_list)
+            {
+                delete (element.second);
+            }
+            this->employee_list.clear();
+
+            // TODO, still some kinks to it...
         }
 
         OrgChart &add_root(string value)
@@ -288,7 +297,7 @@ namespace ariel
             node *next = curr->head;
             while (curr != nullptr)
             {
-                out << curr->val << "(" << curr->parent->val << ") | " ;
+                out << curr->val << "(" << curr->parent->val << ") | ";
                 if (curr->right != nullptr)
                 {
                     curr = curr->right;
