@@ -40,6 +40,7 @@ namespace ariel
             string type; // expects level, reverse, or pre, see iterator implementations at the bottom of this file.
             node *rightKid();
             void gotoLeftmostChild();
+            node *findAnyUncle();
 
         public:
             Iterator(node *init, string _type = "level");

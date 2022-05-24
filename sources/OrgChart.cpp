@@ -31,13 +31,13 @@ namespace ariel
                     if (curr != nullptr)
                     {
                         next = curr->parent;
-                        // TODO: more rigourous logic for the next (in the constructor for this case!)???????
                     }
                 }
                 delete toDelete;
                 toDelete = curr;
             }
         }
+        // TODO: fix. currently using a variation of the reverse order iteration.
 
         this->employee_list.clear();
     }
@@ -72,6 +72,7 @@ namespace ariel
         {
             boss->head = employee;
             boss->tail = employee;
+            /* This section ensures strong connectivity between same-level nodes. */
             if (boss->left != nullptr)
             {
                 node *curr = boss->left;
@@ -114,8 +115,8 @@ namespace ariel
     std::ostream &operator<<(std::ostream &out, OrgChart &org)
     {
         out << org.root->val << "|\n";
-        ariel::node *curr = org.root->head;
-        ariel::node *next = curr->head;
+        OrgChart::node *curr = org.root->head;
+        OrgChart::node *next = curr->head;
         while (curr != nullptr)
         {
             out << curr->val << "(" << curr->parent->val << ") | ";
@@ -230,7 +231,7 @@ namespace ariel
         }
     }
 
-    node *OrgChart::Iterator::rightKid()
+    OrgChart::node *OrgChart::Iterator::rightKid()
     {
         node *it = curr;
         while (it != nullptr)
@@ -262,6 +263,13 @@ namespace ariel
                 if (curr != nullptr && curr->right != nullptr)
                 {
                     curr = curr->right;
+                    if (next == nullptr) // checks for any child nodes that could be missed before exiting.
+                    {
+                        if (curr->head != nullptr)
+                        {
+                            next = curr->head;
+                        }
+                    }
                 }
                 else
                 {
@@ -305,13 +313,13 @@ namespace ariel
                 }
                 else if (curr != nullptr && curr->right != nullptr)
                 {
-                    if (curr->right->parent->val == curr->parent->val)
+                    if (curr->right->parent->val == curr->parent->val) // if right neighbour has the same father node.
                     {
                         curr = curr->right;
                     }
                     else
                     {
-                        while (curr->right->parent->val != curr->parent->val)
+                        while (curr->right->parent->val != curr->parent->val) // while curr and right neighbours parents are different.
                         {
                             curr = curr->parent;
                         }
@@ -321,13 +329,29 @@ namespace ariel
                         }
                     }
                 }
-                else // this means the iterator reached the 'bottom right' member and has therefore finished the preoder
+                else // this means the iterator reached a tail node in a level and has potentially finished the preoder
                 {
-                    curr = nullptr;
+                    curr = findAnyUncle();
                 }
             }
         }
         return *this;
+    }
+
+    OrgChart::node *OrgChart::Iterator::findAnyUncle()
+    {
+        // TODO: fix the kinks
+        node *it = curr;
+        while (it != nullptr)
+        {
+            if (it->right != nullptr)
+            {
+                return it->right;
+            }
+            it = it->parent;
+        }
+
+        return it; // same as return nullptr.
     }
 
     OrgChart::Iterator OrgChart::Iterator::operator++(int)
