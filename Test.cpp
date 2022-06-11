@@ -58,7 +58,6 @@ TEST_CASE("OrgChart")
         CHECK_THROWS(org1.add_sub("COO", "VP_BI"));
     }
 
-    // TODO: iterator tests.
     SUBCASE("level order")
     {
         OrgChart org;
