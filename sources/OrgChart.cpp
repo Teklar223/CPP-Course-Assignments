@@ -4,8 +4,90 @@ namespace ariel
 {
 
     OrgChart::OrgChart() : root(nullptr) {}
+    OrgChart::OrgChart(const OrgChart &other)
+        : root(nullptr)
+    {
+        /**
+         * @brief hard copies the elemnts of other into 'this'
+         */
+        if (other.root != nullptr) // otherwise init' list is enough.
+        {
+            this->add_root(other.root->val);
+            node *curr = other.root->head;
+            node *next = rightKid(curr); // this method helps me continue iterating reliably.
+            while (curr != nullptr || next != nullptr)
+            {
+                this->add_sub(curr->parent->val, curr->val); // simply using the existing values to add a hard copy
+                curr = curr->right;
+                if (curr == nullptr)
+                {
+                    curr = next;
+                    next = rightKid(curr);
+                    /* note that if curr is a nullptr after assignment next will also be assigned as a nullptr here */
+                }
+            }
+        }
+    }
+    OrgChart::OrgChart(OrgChart &&other) // https://docs.microsoft.com/en-us/cpp/cpp/move-constructors-and-move-assignment-operators-cpp?view=msvc-170
+        : root(nullptr)
+    {
+        /**
+         * @brief move constructor built following the microsoft docs.
+         *
+         */
+        this->root = other.root;
+        this->employee_list.insert(other.employee_list.begin(), other.employee_list.end());
+
+        other.root = nullptr;
+        other.employee_list.clear();
+    }
+
+    OrgChart &OrgChart::operator=(const OrgChart &other)
+    {
+        /**
+         * @brief
+         * free current memory, calls copy constructor on a local variable,
+         *  and takes only it's dynamically allocated members
+         * this also means that org and its privates are destroyed at the end of the method (but not the allocated memory!)
+         */
+        this->freeMem();       // making sure whatever was before is free.
+        OrgChart org{other};   // org sits on stack memory
+        this->root = org.root; // but it's root is a pointer to heap space memory.
+        org.root = nullptr;   // this is critical, otherwise the structor will try to free the memory that we want!
+        return *this;
+    }
+
+    OrgChart &OrgChart::operator=(OrgChart &&other) // https://docs.microsoft.com/en-us/cpp/cpp/move-constructors-and-move-assignment-operators-cpp?view=msvc-170
+    {
+        /**
+         * @brief
+         * Simple move constructor, built according to the microsoft docs.
+         */
+        if (this != &other)
+        {
+            this->freeMem(); // clears/frees everything that is used.
+            this->root = other.root;
+            this->employee_list.insert(other.employee_list.begin(), other.employee_list.end());
+
+            other.root = nullptr;
+            other.employee_list.clear();
+        }
+        return *this;
+    }
+
     OrgChart::~OrgChart()
     {
+        freeMem();
+        /* something added after sumbission to show how copy/move constructors work*/
+        printf("Orgchart \'%p\' destroyed\n", this);
+    }
+
+    void OrgChart::freeMem()
+    {
+        /**
+         * @brief A private function to free memory in case of move assignment or destructor.
+         *
+         */
         // initiating a reverse level pass on the OrgChart
         //(the implemented iterator does not support deletion as it does not allow access to the node itself, only the value it holds.)
         if (this->root != nullptr)
@@ -37,8 +119,6 @@ namespace ariel
                 toDelete = curr;
             }
         }
-        // TODO: fix. currently using a variation of the reverse order iteration.
-
         this->employee_list.clear();
     }
 
@@ -64,7 +144,7 @@ namespace ariel
         {
             throw std::logic_error{"You must add_root before you call add_sub!"};
         }
-        node *boss = this->employee_list.at(_boss); // TODO : should throw for me if this item does not exist.
+        node *boss = this->employee_list.at(_boss); // should throw for me if this item does not exist.
         node *employee = new node(value);
         employee->parent = boss;
 
@@ -112,7 +192,7 @@ namespace ariel
         return *this;
     }
 
-    std::ostream &operator<<(std::ostream &out, OrgChart &org)
+    ostream &operator<<(ostream &out, OrgChart &org)
     {
         out << org.root->val << "|\n";
         OrgChart::node *curr = org.root->head;
@@ -131,7 +211,6 @@ namespace ariel
                 if (curr != nullptr)
                 {
                     next = curr->head;
-                    // TODO: if the level order does need more grigours next logic, implement here too.
                 }
             }
         }
@@ -246,6 +325,21 @@ namespace ariel
         return it; // same as return nullptr.
     }
 
+    OrgChart::node *OrgChart::rightKid(node *curr)
+    {
+        node *it = curr;
+        while (it != nullptr)
+        {
+            if (it->head != nullptr)
+            {
+                return it->head;
+            }
+            it = it->right;
+        }
+
+        return it; // same as return nullptr.
+    }
+
     void OrgChart::Iterator::gotoLeftmostChild()
     {
         while (curr->head != nullptr)
@@ -277,7 +371,6 @@ namespace ariel
                     if (curr != nullptr)
                     {
                         next = curr->head;
-                        // TODO: more rigourous logic for the next (in cases where curr.head is empty but curr.right.right.head exists for example)????
                     }
                 }
             }
@@ -340,7 +433,6 @@ namespace ariel
 
     OrgChart::node *OrgChart::Iterator::findAnyUncle()
     {
-        // TODO: fix the kinks
         node *it = curr;
         while (it != nullptr)
         {

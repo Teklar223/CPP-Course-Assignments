@@ -12,25 +12,51 @@
 using std::iterator;
 using std::map;
 using std::string;
+using std::ostream;
 
 namespace ariel
 {
     class OrgChart
     {
-        // *** Inner Classes *** //
-    private:
-        struct node
-        {
-            string val;
-            node *parent = nullptr; // represents the boss
-            node *head = nullptr;   // represents first employee of this employer
-            node *tail = nullptr;   // represents last employee of this employer
-            node *left = nullptr;   // represents same-level co-worker, linked from left
-            node *right = nullptr;  // represents same-level co-worker, linked from right
-            node(string &value) : val(value) {} //constructor
-        };
+        // *** Forward Declaration of inner classes *** //
 
+    private:
+        struct node;
     public:
+        class Iterator;
+    
+        // ***  The Class itself *** //
+    
+    public:
+        OrgChart();
+        OrgChart(const OrgChart & other);
+        OrgChart(OrgChart && other);
+
+        ~OrgChart();
+
+        OrgChart &add_root(string value);
+        OrgChart &add_sub(string const &_boss, string value);
+
+        OrgChart& operator=(const OrgChart& other);
+        OrgChart& operator=(OrgChart && other);
+        friend ostream &operator<<(ostream &out, OrgChart &org);
+
+        Iterator begin();
+        Iterator end();
+        Iterator begin_level_order();
+        Iterator end_level_order();
+        Iterator begin_reverse_order();
+        Iterator reverse_order();
+        Iterator begin_preorder();
+        Iterator end_preorder();
+
+        private:
+        node *root;
+        map<string, node *> employee_list;
+        void freeMem();
+        node *rightKid(node *curr);
+
+        public:
         class Iterator // with the help of https://www.youtube.com/watch?v=F9eDv-YIOQ0&ab_channel=TheCherno and similar sources (google)
         {
 
@@ -57,30 +83,16 @@ namespace ariel
 
             bool operator!=(const Iterator &other) const;
         };
-
-        // *** Types and Functions *** //
-    private:
-        node *root;
-        map<string, node *> employee_list;
-
-    public:
-        OrgChart();
-
-        ~OrgChart();
-
-        OrgChart &add_root(string value);
-
-        OrgChart &add_sub(string const &_boss, string value);
-
-        Iterator begin();
-        Iterator end();
-        Iterator begin_level_order();
-        Iterator end_level_order();
-        Iterator begin_reverse_order();
-        Iterator reverse_order();
-        Iterator begin_preorder();
-        Iterator end_preorder();
-
-        friend std::ostream &operator<<(std::ostream &out, OrgChart &org);
+        private:
+        struct node
+        {
+            string val;
+            node *parent = nullptr; // represents the boss
+            node *head = nullptr;   // represents first employee of this employer
+            node *tail = nullptr;   // represents last employee of this employer
+            node *left = nullptr;   // represents same-level co-worker, linked from left
+            node *right = nullptr;  // represents same-level co-worker, linked from right
+            node(string &value) : val(value) {} //constructor
+        };
     };
 }

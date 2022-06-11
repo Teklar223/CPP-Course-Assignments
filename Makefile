@@ -13,13 +13,17 @@ VALGRIND_FLAGS=-v --leak-check=full --show-leak-kinds=all  --error-exitcode=99
 SOURCES=$(wildcard $(SOURCE_PATH)/*.cpp)
 HEADERS=$(wildcard $(SOURCE_PATH)/*.hpp)
 OBJECTS=$(subst sources/,objects/,$(subst .cpp,.o,$(SOURCES)))
+DEMO_OBJ = $(filter-out objects/TestRunner.o, $(OBJECTS))
+TEST_OBJ = $(filter-out objects/Demo.o, $(OBJECTS))
+
+all: demo test
 
 run: test
 
-demo: $(OBJECTS)
+demo: $(DEMO_OBJ)
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
-test: TestRunner.o StudentTest1.o StudentTest2.o StudentTest3.o $(OBJECTS)
+test: TestRunner.o StudentTest1.o StudentTest2.o StudentTest3.o $(TEST_OBJ)
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 %.o: %.cpp $(HEADERS)
@@ -27,6 +31,8 @@ test: TestRunner.o StudentTest1.o StudentTest2.o StudentTest3.o $(OBJECTS)
 
 $(OBJECT_PATH)/%.o: $(SOURCE_PATH)/%.cpp $(HEADERS)
 	$(CXX) $(CXXFLAGS) --compile $< -o $@
+
+StudentTest0.o: StudentTest0
 
 # Renana Rimon
 StudentTest1.cpp:  
@@ -48,4 +54,4 @@ valgrind: test
 
 clean:
 	rm -f $(OBJECTS) *.o test* 
-	rm -f StudentTest*.cpp
+	rm -f StudentTest*.cpp demo
