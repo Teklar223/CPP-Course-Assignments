@@ -13,17 +13,10 @@ VALGRIND_FLAGS=-v --leak-check=full --show-leak-kinds=all  --error-exitcode=99
 SOURCES=$(wildcard $(SOURCE_PATH)/*.cpp)
 HEADERS=$(wildcard $(SOURCE_PATH)/*.hpp)
 OBJECTS=$(subst sources/,objects/,$(subst .cpp,.o,$(SOURCES)))
-DEMO_OBJ = $(filter-out objects/TestRunner.o, $(OBJECTS))
-TEST_OBJ = $(filter-out objects/Demo.o, $(OBJECTS))
-
-all: demo test
 
 run: test
 
-demo: $(DEMO_OBJ)
-	$(CXX) $(CXXFLAGS) $^ -o $@
-
-test: TestRunner.o StudentTest1.o StudentTest2.o StudentTest3.o $(TEST_OBJ)
+test:  $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 %.o: %.cpp $(HEADERS)
@@ -32,26 +25,13 @@ test: TestRunner.o StudentTest1.o StudentTest2.o StudentTest3.o $(TEST_OBJ)
 $(OBJECT_PATH)/%.o: $(SOURCE_PATH)/%.cpp $(HEADERS)
 	$(CXX) $(CXXFLAGS) --compile $< -o $@
 
-StudentTest0.o: StudentTest0
-
-# Renana Rimon
-StudentTest1.cpp:  
-	curl https://raw.githubusercontent.com/renanarimon/cpp_5b_test/master/Test.cpp > $@
-
-# Shauli Taragin
-StudentTest2.cpp: 
-	curl https://raw.githubusercontent.com/ShauliTaragin/Orgchart-A/main/Test.cpp > $@
-
-# Dvir Gev
-StudentTest3.cpp: 
-	curl https://raw.githubusercontent.com/dvirGev/CPP--Ex5-par1/main/Test.cpp > $@
 
 tidy:
-	clang-tidy $(SOURCES) $(TIDY_FLAGS) --
+	clang-tidy $(SOURCES) $(HEADERS) $(TIDY_FLAGS) --
 
 valgrind: test
 	valgrind --tool=memcheck $(VALGRIND_FLAGS) ./test 2>&1 | { egrep "lost| at " || true; }
 
 clean:
 	rm -f $(OBJECTS) *.o test* 
-	rm -f StudentTest*.cpp demo
+	rm -f StudentTest*.cpp
