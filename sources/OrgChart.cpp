@@ -53,7 +53,7 @@ namespace ariel
         this->freeMem();       // making sure whatever was before is free.
         OrgChart org{other};   // org sits on stack memory
         this->root = org.root; // but it's root is a pointer to heap space memory.
-        org.root = nullptr;   // this is critical, otherwise the structor will try to free the memory that we want!
+        org.root = nullptr;    // this is critical, otherwise the structor will try to free the memory that we want!
         return *this;
     }
 
@@ -194,23 +194,30 @@ namespace ariel
 
     ostream &operator<<(ostream &out, OrgChart &org)
     {
-        out << org.root->val << "|\n";
-        OrgChart::node *curr = org.root->head;
-        OrgChart::node *next = curr->head;
-        while (curr != nullptr)
+        if (org.root == nullptr)
         {
-            out << curr->val << "(" << curr->parent->val << ") | ";
-            if (curr->right != nullptr)
+            out << "empty" << '\n';
+        }
+        else
+        {
+            out << org.root->val << "|\n";
+            OrgChart::node *curr = org.root->head;
+            OrgChart::node *next = curr->head;
+            while (curr != nullptr)
             {
-                curr = curr->right;
-            }
-            else
-            {
-                out << '\n';
-                curr = next;
-                if (curr != nullptr)
+                out << curr->val << "(" << curr->parent->val << ") | ";
+                if (curr->right != nullptr)
                 {
-                    next = curr->head;
+                    curr = curr->right;
+                }
+                else
+                {
+                    out << '\n';
+                    curr = next;
+                    if (curr != nullptr)
+                    {
+                        next = curr->head;
+                    }
                 }
             }
         }

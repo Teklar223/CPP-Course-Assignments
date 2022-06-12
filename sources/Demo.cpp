@@ -85,5 +85,9 @@ int main()
     OrgChart moved_chart2 = move(moved_chart);
     cout << moved_chart2 << endl << endl;
 
+    cout << "now I try to print the charts that were moved: " << endl << endl;
+    cout << "newChart2: " << newchart2 << endl << endl;
+    cout << "moved_chart: " << moved_chart << endl << endl;
+
     cout << "Now the compiler will call the destructors and we will see that they are indeed different objects:" << endl << endl;
 }
