@@ -19,13 +19,4 @@ int main()
     cout << "Most losses: " << most_lose->getName() << endl;
     cout << "Biggest win streak: " << win_streak->getName() << endl;
     cout << "Biggest lose streak: " << lose_streak->getName() << endl;
-
-    // TODO:
-    /*
-     * [X] Team Implementation
-     * [X] Game Implementation
-     * [X] League Implementation
-     * [X] Schedule Implementation
-     * [] submit
-     */
 }
